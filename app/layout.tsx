@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
+import { Alegreya, Inter } from "next/font/google";
 import "./globals.css";
 
-const playfair = Playfair_Display({
+const alegreya = Alegreya({
   subsets: ["latin", "latin-ext", "greek"],
   weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="el" className={`${playfair.variable} ${inter.variable}`}>
+    <html lang="el" className={`${alegreya.variable} ${inter.variable}`}>
       <body className="bg-bg font-sans text-ink antialiased">{children}</body>
     </html>
   );
