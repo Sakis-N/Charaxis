@@ -1,17 +1,32 @@
 import Link from "next/link";
 
+const navLinks = [
+  { href: "#categories", label: "Κατηγορίες" },
+  { href: "#custom", label: "Φτιάξε το δικό σου" },
+  { href: "#quote", label: "Ζήτα Προσφορά" },
+  { href: "#contact", label: "Επικοινωνία" },
+];
+
 export default function Header() {
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-6 py-5 md:px-16">
-      <Link href="/" className="font-display text-2xl font-semibold tracking-wide">
+      <Link
+        href="/"
+        className="font-display text-2xl font-semibold tracking-wide transition-colors duration-200 hover:text-accent"
+      >
         CHARAXIS
       </Link>
 
       <nav className="flex flex-wrap gap-9 text-[15px] font-medium">
-        <Link href="#categories">Κατηγορίες</Link>
-        <Link href="#custom">Φτιάξε το δικό σου</Link>
-        <Link href="#quote">Ζήτα Προσφορά</Link>
-        <Link href="#contact">Επικοινωνία</Link>
+        {navLinks.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="relative py-1 after:absolute after:bottom-0 after:left-0 after:h-[1.5px] after:w-0 after:bg-accent after:transition-all after:duration-300 after:ease-out hover:after:w-full"
+          >
+            {link.label}
+          </Link>
+        ))}
       </nav>
 
       <div className="flex items-center gap-4">
@@ -21,6 +36,7 @@ export default function Header() {
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
+          className="cursor-pointer transition-transform duration-200 ease-out hover:scale-110"
         >
           <circle cx="11" cy="11" r="7" stroke="#2A2420" strokeWidth="1.6" />
           <path
@@ -32,7 +48,7 @@ export default function Header() {
         </svg>
         <button
           aria-label="Καλάθι"
-          className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white"
+          className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-accent-dark hover:shadow-md hover:shadow-accent/25"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path

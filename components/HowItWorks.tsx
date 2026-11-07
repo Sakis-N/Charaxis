@@ -2,7 +2,7 @@ const steps = [
   {
     n: 1,
     title: "Διάλεξε προϊόν",
-    text: "Μπρελόκ, art print ή διακοσμητικό — όλα σε 3mm κόντρα πλακέ σημύδας.",
+    text: "Μπρελόκ, χαραγμένη φωτογραφία ή στολίδι — όλα σε 3mm κόντρα πλακέ σημύδας.",
   },
   {
     n: 2,
@@ -24,9 +24,9 @@ export default function HowItWorks() {
         {steps.map((step) => (
           <div
             key={step.n}
-            className="flex flex-col items-center gap-3.5 text-center"
+            className="group flex flex-col items-center gap-3.5 text-center"
           >
-            <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full border-[1.5px] border-accent bg-white font-display text-xl text-accent">
+            <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full border-[1.5px] border-accent bg-white font-display text-xl text-accent transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:bg-accent group-hover:text-white group-hover:shadow-lg group-hover:shadow-accent/20">
               {step.n}
             </div>
             <h3 className="text-[17px] font-semibold">{step.title}</h3>

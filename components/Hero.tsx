@@ -14,17 +14,19 @@ export default function Hero() {
           πρόσθεσε το δικό σου κείμενο — ή ζήτα κάτι εντελώς διαφορετικό.
         </p>
         <div className="mt-2 flex flex-wrap gap-4">
-          <button className="rounded-full bg-accent px-7 py-[15px] text-[15px] font-semibold text-white">
+          <button className="rounded-full bg-accent px-7 py-[15px] text-[15px] font-semibold text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/25">
             Φτιάξε το δικό σου
           </button>
-          <button className="rounded-full border-[1.5px] border-ink px-7 py-[15px] text-[15px] font-semibold">
+          <button className="rounded-full border-[1.5px] border-ink px-7 py-[15px] text-[15px] font-semibold transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-ink hover:text-bg">
             Δες τη συλλογή
           </button>
         </div>
       </div>
 
-      <div className="placeholder-tile h-[320px] min-w-0 flex-1 basis-[420px] rounded-2xl md:h-[440px]">
-        Φωτογραφία προϊόντος — hero
+      <div className="placeholder-tile h-[320px] min-w-0 flex-1 basis-[420px] overflow-hidden rounded-2xl md:h-[440px]">
+        <span className="inline-block transition-transform duration-700 ease-out hover:scale-105">
+          Φωτογραφία προϊόντος — hero
+        </span>
       </div>
     </section>
   );

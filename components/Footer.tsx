@@ -12,16 +12,16 @@ export default function Footer() {
 
         <div className="flex flex-1 basis-[160px] flex-col gap-2.5 text-sm">
           <div className="mb-1 font-semibold">Κατάστημα</div>
-          <a href="#categories" className="text-muted">
+          <a href="#categories" className="text-muted transition-colors duration-200 hover:text-accent">
             Μπρελόκ
           </a>
-          <a href="#categories" className="text-muted">
+          <a href="#categories" className="text-muted transition-colors duration-200 hover:text-accent">
             Χαραγμένη Φωτογραφία
           </a>
-          <a href="#categories" className="text-muted">
+          <a href="#categories" className="text-muted transition-colors duration-200 hover:text-accent">
             Χριστουγεννιάτικα Στολίδια
           </a>
-          <a href="#quote" className="text-muted">
+          <a href="#quote" className="text-muted transition-colors duration-200 hover:text-accent">
             Ζήτα Προσφορά
           </a>
         </div>
