@@ -5,8 +5,8 @@ export default function Footer() {
         <div className="flex max-w-[280px] flex-1 basis-[260px] flex-col gap-3">
           <div className="font-display text-xl font-semibold">CHARAXIS</div>
           <p className="text-sm leading-relaxed text-muted">
-            Εργαστήριο χαμηλής όχλησης, custom laser χαράξεις σε ξύλο
-            σημύδας. Κάθε κομμάτι φτιάχνεται ένα-ένα, κατόπιν παραγγελίας.
+            Εργαστήριο χαμηλής όχλησης, custom laser χαράξεις σε ξύλο. Κάθε
+            κομμάτι φτιάχνεται ένα-ένα, κατόπιν παραγγελίας.
           </p>
         </div>
 

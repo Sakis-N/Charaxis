@@ -1,7 +1,6 @@
 # Charaxis — eshop
 
-Next.js (App Router) + Tailwind CSS + Supabase. Custom laser χαράξεις σε ξύλο
-σημύδας 3mm.
+Next.js (App Router) + Tailwind CSS + Supabase. Custom laser χαράξεις σε ξύλο.
 
 ## Τοπική ανάπτυξη
 

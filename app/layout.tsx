@@ -20,7 +20,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Charaxis — Χειροποίητες Laser Χαράξεις",
   description:
-    "Προσωποποιημένα ξύλινα μπρελόκ, art renderings και χαραγμένα διανυσματικά σχέδια, χαραγμένα σε κόντρα πλακέ σημύδας 3mm.",
+    "Προσωποποιημένα ξύλινα μπρελόκ, χαραγμένες φωτογραφίες και χριστουγεννιάτικα στολίδια, χαραγμένα σε ξύλο.",
 };
 
 export default function RootLayout({

@@ -6,7 +6,7 @@ export default function Hero() {
           Χειροποίητες Laser Χαράξεις
         </div>
         <h1 className="text-[42px] font-medium leading-tight md:text-[52px]">
-          Προσωποποιημένα κομμάτια, χαραγμένα σε ξύλο σημύδας
+          Προσωποποιημένα κομμάτια, χαραγμένα σε ξύλο
         </h1>
         <p className="max-w-[480px] text-[17px] leading-relaxed text-muted">
           Μπρελόκ, χαραγμένες φωτογραφίες και χριστουγεννιάτικα στολίδια,
