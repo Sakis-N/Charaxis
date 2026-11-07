@@ -16,13 +16,13 @@ export default function Footer() {
             Μπρελόκ
           </a>
           <a href="#categories" className="text-muted">
-            Art Prints
+            Χαραγμένη Φωτογραφία
           </a>
           <a href="#categories" className="text-muted">
-            Διακοσμητικά
+            Χριστουγεννιάτικα Στολίδια
           </a>
-          <a href="#custom" className="text-muted">
-            Φτιάξε το δικό σου
+          <a href="#quote" className="text-muted">
+            Ζήτα Προσφορά
           </a>
         </div>
 

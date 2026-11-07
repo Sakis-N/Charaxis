@@ -1,10 +1,10 @@
 // TODO: αντικατάσταση με πραγματικά δεδομένα από τον πίνακα `products` στο
 // Supabase, μόλις οριστικοποιηθεί το data model.
 const products = [
-  { name: "Προσωποποιημένο μπρελόκ με όνομα", material: "Σημύδα 3mm" },
-  { name: "Art print χάρτη πόλης", material: "Σημύδα 3mm" },
-  { name: "Μπρελόκ με φωτογραφία κατοικιδίου", material: "Σημύδα 3mm" },
-  { name: "Διακοσμητικό vector σχέδιο", material: "Σημύδα 3mm" },
+  { name: "Μπρελόκ με όνομα & ημερομηνία", material: "Σημύδα 3mm" },
+  { name: "Χαραγμένη φωτογραφία ζευγαριού", material: "Σημύδα 3mm" },
+  { name: "Μπρελόκ ζευγαριού (μισό-μισό)", material: "Σημύδα 3mm" },
+  { name: "Χριστουγεννιάτικο στολίδι με φωτογραφία", material: "Σημύδα 3mm" },
 ];
 
 export default function FeaturedProducts() {

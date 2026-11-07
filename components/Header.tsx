@@ -10,7 +10,7 @@ export default function Header() {
       <nav className="flex flex-wrap gap-9 text-[15px] font-medium">
         <Link href="#categories">Κατηγορίες</Link>
         <Link href="#custom">Φτιάξε το δικό σου</Link>
-        <Link href="#about">Για εμάς</Link>
+        <Link href="#quote">Ζήτα Προσφορά</Link>
         <Link href="#contact">Επικοινωνία</Link>
       </nav>
 
