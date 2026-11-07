@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
+}
+
+.placeholder-tile {
+  background-image: repeating-linear-gradient(
+    135deg,
+    #ede4d3,
+    #ede4d3 10px,
+    #e6dac3 10px,
+    #e6dac3 20px
+  );
+  @apply flex items-center justify-center border border-border text-center text-[13px] text-faint;
+}

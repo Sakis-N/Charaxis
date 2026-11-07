@@ -1,0 +1,5 @@
+[build]
+  command = "npm run build"
+
+# Το Netlify ανιχνεύει αυτόματα το Next.js (App Router) και εγκαθιστά
+# το δικό του Next.js Runtime plugin· δεν χρειάζεται χειροκίνητο publish dir.
