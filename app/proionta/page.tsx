@@ -41,9 +41,9 @@ export default async function ProductsPage() {
         {products.length === 0 ? (
           <p className="font-serif text-wood">
             Σύντομα εδώ — ή{" "}
-            <a href="#quote" className="text-ink underline underline-offset-2 hover:text-ember">
+            <Link href="/prosfora" className="text-ink underline underline-offset-2 hover:text-ember">
               ζήτα προσφορά
-            </a>{" "}
+            </Link>{" "}
             για κάτι συγκεκριμένο.
           </p>
         ) : (
@@ -71,7 +71,7 @@ export default async function ProductsPage() {
                     {p.name}
                   </h3>
                   <div className="text-[15px] text-wood">
-                    {p.base_price ? `${Number(p.base_price).toFixed(2)} €` : "[ΤΙΜΗ]"}
+                    {p.base_price ? `${Number(p.base_price).toFixed(2)} €` : ""}
                   </div>
                 </Link>
               );

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
+import { notifyOrderCreated } from "@/lib/server/orderNotify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,8 +47,11 @@ export async function POST(req: Request) {
         await fetch(`${sbUrl}/rest/v1/orders?id=eq.${orderId}`, {
           method: "PATCH",
           headers,
-          body: JSON.stringify({ payment_status: "paid" }),
+          body: JSON.stringify({ payment_status: "paid", status: "paid" }),
         });
+        try {
+          await notifyOrderCreated(orderId);
+        } catch {}
       }
     }
   }

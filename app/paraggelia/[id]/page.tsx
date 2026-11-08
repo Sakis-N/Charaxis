@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase/client";
+import { BANK } from "@/lib/business";
 
 type Order = {
   id: string;
@@ -15,12 +16,23 @@ type Order = {
   payment_provider: string;
   payment_status: string;
   customer_email: string;
+  status: string;
+  tracking_number: string | null;
   items: { name: string; quantity: number; line_total: number }[];
 };
 
-const IBAN = process.env.NEXT_PUBLIC_BANK_IBAN;
-const BANK_NAME = process.env.NEXT_PUBLIC_BANK_NAME;
-const BANK_HOLDER = process.env.NEXT_PUBLIC_BANK_HOLDER;
+const IBAN = BANK.iban;
+const BANK_NAME = BANK.name;
+const BANK_HOLDER = BANK.holder;
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Σε αναμονή",
+  paid: "Πληρώθηκε",
+  processing: "Σε παραγωγή",
+  shipped: "Στάλθηκε",
+  completed: "Ολοκληρώθηκε",
+  cancelled: "Ακυρώθηκε",
+};
 
 export default function OrderPage({ params }: { params: { id: string } }) {
   const [order, setOrder] = useState<Order | null>(null);
@@ -80,6 +92,13 @@ export default function OrderPage({ params }: { params: { id: string } }) {
                 <div>Αιτιολογία: <span className="font-medium">#{shortId}</span></div>
               </div>
             )}
+
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+              <span><span className="text-wood">Κατάσταση:</span> <b className="font-medium">{STATUS_LABEL[order.status] ?? order.status}</b></span>
+              {order.tracking_number && (
+                <span><span className="text-wood">Tracking:</span> <b className="font-medium">{order.tracking_number}</b></span>
+              )}
+            </div>
 
             <ul className="flex flex-col gap-2 border-y border-line py-4 text-sm">
               {order.items.map((i, n) => (

@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useCart } from "@/lib/cart";
 
 const navLinks = [
-  { href: "#categories", label: "Κατηγορίες" },
-  { href: "#custom", label: "Φτιάξε το δικό σου" },
-  { href: "#quote", label: "Ζήτα Προσφορά" },
-  { href: "#contact", label: "Επικοινωνία" },
+  { href: "/proionta", label: "Προϊόντα" },
+  { href: "/#categories", label: "Κατηγορίες" },
+  { href: "/prosfora", label: "Ζήτα Προσφορά" },
+  { href: "/epikoinonia", label: "Επικοινωνία" },
 ];
 
 export default function Header() {

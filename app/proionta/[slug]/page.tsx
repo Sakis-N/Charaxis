@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
@@ -38,6 +39,18 @@ async function getProduct(slug: string): Promise<Product | null> {
   }
 }
 
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const p = await getProduct(params.slug);
+  if (!p) return { title: "Προϊόν — Charaxis" };
+  const desc = p.description?.slice(0, 160) || `${p.name} — χειροποίητη laser χάραξη σε ξύλο από το Charaxis.`;
+  const img = p.images?.[0];
+  return {
+    title: `${p.name} — Charaxis`,
+    description: desc,
+    openGraph: { title: p.name, description: desc, images: img ? [img] : undefined },
+  };
+}
+
 export default async function ProductPage({
   params,
 }: {
@@ -51,6 +64,22 @@ export default async function ProductPage({
 
   return (
     <main className="flex flex-col overflow-x-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            description: product.description || undefined,
+            image: images.length ? images : undefined,
+            brand: { "@type": "Brand", name: "Charaxis" },
+            offers: price
+              ? { "@type": "Offer", priceCurrency: "EUR", price: price.toFixed(2), availability: "https://schema.org/InStock" }
+              : undefined,
+          }),
+        }}
+      />
       <Header />
       <section className="flex flex-col gap-3 px-6 pt-6 text-sm text-wood md:px-16">
         <nav>
@@ -74,7 +103,7 @@ export default async function ProductPage({
             {product.name}
           </h1>
           <div className="text-2xl font-medium text-ember">
-            {price ? `${price.toFixed(2)} €` : "[ΤΙΜΗ]"}
+            {price ? `${price.toFixed(2)} €` : ""}
           </div>
           {product.description && (
             <p className="max-w-md font-serif text-[15px] leading-relaxed text-wood">

@@ -11,14 +11,6 @@ type Product = {
   images: string[] | null;
 };
 
-// Placeholders για τις θέσεις που δεν έχουν ακόμα πραγματικό προϊόν στη βάση.
-const placeholders = [
-  { name: "Μπρελόκ με όνομα & ημερομηνία", material: "Ξύλο" },
-  { name: "Χαραγμένη φωτογραφία ζευγαριού", material: "Ξύλο" },
-  { name: "Μπρελόκ ζευγαριού (μισό-μισό)", material: "Ξύλο" },
-  { name: "Χριστουγεννιάτικο στολίδι με φωτογραφία", material: "Ξύλο" },
-];
-
 async function getFeaturedProducts(): Promise<Product[]> {
   try {
     const { data, error } = await supabase
@@ -40,15 +32,14 @@ async function getFeaturedProducts(): Promise<Product[]> {
 
 export default async function FeaturedProducts() {
   const products = await getFeaturedProducts();
-  const slotsLeft = Math.max(0, 4 - products.length);
 
   return (
     <section className="flex flex-col gap-9 border-t border-line px-6 py-16 md:px-16 md:py-24">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="text-[26px] font-medium">Δημοφιλή</h2>
-        <a href="/proionta" className="text-sm text-wood transition-colors duration-200 hover:text-ember">
+        <Link href="/proionta" className="text-sm text-wood transition-colors duration-200 hover:text-ember">
           Δες όλα τα προϊόντα
-        </a>
+        </Link>
       </div>
       <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
         {products.map((p) => {
@@ -74,21 +65,12 @@ export default async function FeaturedProducts() {
                 {p.name}
               </h3>
               <div className="text-[15px] text-wood">
-                {p.base_price ? `${Number(p.base_price).toFixed(2)} €` : "[ΤΙΜΗ]"}
+                {p.base_price ? `${Number(p.base_price).toFixed(2)} €` : ""}
               </div>
             </Link>
           );
         })}
 
-        {placeholders.slice(0, slotsLeft).map((p) => (
-          <div key={p.name} className="flex flex-col gap-2.5">
-            <div className="placeholder-tile h-[200px] overflow-hidden rounded-sm">
-              <span className="inline-block">Φωτογραφία προϊόντος</span>
-            </div>
-            <h3 className="text-[15px] font-medium leading-snug">{p.name}</h3>
-            <div className="text-[15px] text-wood">[ΤΙΜΗ]</div>
-          </div>
-        ))}
       </div>
     </section>
   );

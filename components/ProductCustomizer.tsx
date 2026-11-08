@@ -254,7 +254,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
 
       <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
         <div className="text-lg font-medium text-ember">
-          {basePrice ? `${basePrice.toFixed(2)} €` : "[ΤΙΜΗ]"}
+          {basePrice ? `${basePrice.toFixed(2)} €` : ""}
         </div>
         <button
           type="button"

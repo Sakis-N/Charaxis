@@ -1,7 +1,7 @@
 const categories = [
   { name: "Μπρελόκ", href: "/kategories/mpreloka" },
   { name: "Χαραγμένη Φωτογραφία", href: "/kategories/xaragmeni-fotografia" },
-  { name: "Χριστουγεννιάτικα Στολίδια", href: "/kategories/xristougeniatika" },
+  { name: "Χριστουγεννιάτικα Στολίδια", href: "/kategories/xristougeniatika-stolidia" },
 ];
 
 export default function Categories() {
@@ -25,7 +25,7 @@ export default function Categories() {
 
         <a
           id="quote"
-          href="mailto:info@charaxis.gr?subject=Ζήτηση προσφοράς"
+          href="/prosfora"
           className="group flex h-[220px] flex-col items-center justify-center gap-3 border border-dashed border-line p-6 text-center transition-colors duration-200 hover:border-ember"
         >
           <svg

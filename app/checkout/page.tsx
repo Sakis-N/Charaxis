@@ -129,6 +129,13 @@ export default function CheckoutPage() {
         return;
       }
     }
+    // Email επιβεβαίωσης (δεν περιμένουμε και δεν αποτυγχάνουμε αν σκάσει).
+    fetch("/api/notify/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ order_id: orderId }),
+      keepalive: true,
+    }).catch(() => {});
     clear();
     router.push(`/paraggelia/${orderId}`);
   }

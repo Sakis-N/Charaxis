@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart";
+import { SITE_URL } from "@/lib/site";
 
 // Manrope — τίτλοι, navigation, τιμές, κουμπιά: καθαρή, "μηχανική"
 // ακρίβεια, με πλήρη ελληνικά. Variable font — δεν ορίζουμε discrete
@@ -22,6 +23,15 @@ const serif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  openGraph: {
+    type: "website",
+    locale: "el_GR",
+    siteName: "Charaxis",
+    title: "Charaxis — Χειροποίητες Laser Χαράξεις",
+    description:
+      "Προσωποποιημένα ξύλινα μπρελόκ, χαραγμένες φωτογραφίες και χριστουγεννιάτικα στολίδια, χαραγμένα σε ξύλο.",
+  },
   title: "Charaxis — Χειροποίητες Laser Χαράξεις",
   description:
     "Προσωποποιημένα ξύλινα μπρελόκ, χαραγμένες φωτογραφίες και χριστουγεννιάτικα στολίδια, χαραγμένα σε ξύλο.",

@@ -3,7 +3,7 @@ import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
 import Categories from "@/components/Categories";
 import FeaturedProducts from "@/components/FeaturedProducts";
-import Testimonial from "@/components/Testimonial";
+import QuoteBand from "@/components/QuoteBand";
 import Footer from "@/components/Footer";
 
 export default function HomePage() {
@@ -14,7 +14,7 @@ export default function HomePage() {
       <HowItWorks />
       <Categories />
       <FeaturedProducts />
-      <Testimonial />
+      <QuoteBand />
       <Footer />
     </main>
   );
