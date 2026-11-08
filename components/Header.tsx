@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
 
@@ -39,8 +40,16 @@ export default function Header() {
       <div className="flex items-center justify-between gap-4 px-5 py-4 md:px-16 md:py-5">
         <Link
           href="/"
-          className="text-[19px] font-semibold tracking-tight transition-colors duration-200 hover:text-ember md:text-[21px]"
+          className="flex items-center gap-2.5 text-[19px] font-semibold tracking-tight transition-colors duration-200 hover:text-ember md:text-[21px]"
         >
+          <Image
+            src="/brand/charaxis-logo.jpg"
+            alt=""
+            width={40}
+            height={40}
+            className="h-9 w-9 rounded-full md:h-10 md:w-10"
+            priority
+          />
           Charaxis
         </Link>
 

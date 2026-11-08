@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { BUSINESS } from "@/lib/business";
 
@@ -8,7 +9,7 @@ export default function Footer() {
     <footer id="contact">
       <div className="flex flex-wrap justify-between gap-12 border-t border-line px-6 py-16 md:px-16">
         <div className="flex max-w-[280px] flex-1 basis-[260px] flex-col gap-3">
-          <div className="text-xl font-semibold">Charaxis</div>
+          <Image src="/brand/charaxis-logo.jpg" alt="Charaxis Laser Creations" width={96} height={96} className="h-24 w-24 rounded-full" />
           <p className="font-serif text-[15px] leading-relaxed text-wood">
             Εργαστήριο χαμηλής όχλησης, custom laser χαράξεις σε ξύλο. Κάθε κομμάτι φτιάχνεται ένα-ένα, κατόπιν παραγγελίας.
           </p>

@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "el_GR",
     siteName: "Charaxis",
+    images: ["/brand/charaxis-logo.jpg"],
     title: "Charaxis — Χειροποίητες Laser Χαράξεις",
     description:
       "Προσωποποιημένα ξύλινα μπρελόκ, χαραγμένες φωτογραφίες και χριστουγεννιάτικα στολίδια, χαραγμένα σε ξύλο.",
