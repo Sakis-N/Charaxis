@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCustomizer, { type CustomField } from "@/components/ProductCustomizer";
+import ProductGallery from "@/components/ProductGallery";
 
 type Product = {
   id: string;
@@ -45,7 +45,7 @@ export default async function ProductPage({
   const product = await getProduct(params.slug);
   if (!product) notFound();
 
-  const img = product.images && product.images.length > 0 ? product.images[0] : null;
+  const images = product.images || [];
   const price = product.base_price ? Number(product.base_price) : null;
 
   return (
@@ -62,22 +62,7 @@ export default async function ProductPage({
       </section>
 
       <section className="grid grid-cols-1 gap-10 px-6 py-8 md:grid-cols-2 md:gap-14 md:px-16 md:py-12">
-        <div className="relative h-[320px] overflow-hidden rounded-2xl bg-border/40 md:h-[480px]">
-          {img ? (
-            <Image
-              src={img}
-              alt={product.name}
-              fill
-              sizes="(min-width: 768px) 50vw, 100vw"
-              className="object-cover"
-              priority
-            />
-          ) : (
-            <div className="placeholder-tile h-full">
-              <span className="inline-block">Φωτογραφία προϊόντος</span>
-            </div>
-          )}
-        </div>
+        <ProductGallery images={images} productName={product.name} />
 
         <div className="flex flex-col gap-5">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-faint">
