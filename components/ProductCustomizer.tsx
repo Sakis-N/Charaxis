@@ -51,19 +51,19 @@ export default function ProductCustomizer({ productName, basePrice, fields }: Pr
   const canAdd = !blockedToggle;
 
   return (
-    <div className="flex flex-col gap-8 rounded-2xl border border-border bg-white/60 p-6 md:p-8">
+    <div className="flex flex-col gap-8 border border-line bg-paper p-6 md:p-8">
       <h2 className="text-xl font-semibold">Προσαρμόσε το σχέδιο</h2>
 
       {fields.map((field, idx) => (
         <div key={field.id} className="flex flex-col gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-ink text-xs">
               {idx + 1}
             </span>
-            <span className="font-semibold">{field.label}</span>
+            <span className="font-medium">{field.label}</span>
           </div>
           {field.description && (
-            <p className="pl-[34px] text-sm text-muted">{field.description}</p>
+            <p className="pl-[34px] font-serif text-sm text-wood">{field.description}</p>
           )}
 
           <div className="pl-[34px]">
@@ -73,7 +73,7 @@ export default function ProductCustomizer({ productName, basePrice, fields }: Pr
                 value={(values[field.id] as string) || ""}
                 onChange={(e) => setValue(field.id, e.target.value)}
                 placeholder={field.placeholder}
-                className="w-full max-w-md rounded-xl border border-border bg-bg px-4 py-3 text-sm outline-none transition-colors duration-200 focus:border-accent"
+                className="w-full max-w-md border border-line bg-paper px-4 py-3 text-sm outline-none transition-colors duration-200 focus:border-ink"
               />
             )}
 
@@ -83,7 +83,7 @@ export default function ProductCustomizer({ productName, basePrice, fields }: Pr
                 onChange={(e) => setValue(field.id, e.target.value)}
                 rows={4}
                 placeholder={field.placeholder}
-                className="w-full max-w-md rounded-xl border border-border bg-bg px-4 py-3 text-sm leading-relaxed outline-none transition-colors duration-200 focus:border-accent"
+                className="w-full max-w-md border border-line bg-paper px-4 py-3 text-sm leading-relaxed outline-none transition-colors duration-200 focus:border-ink"
               />
             )}
 
@@ -94,10 +94,10 @@ export default function ProductCustomizer({ productName, basePrice, fields }: Pr
                     key={opt}
                     type="button"
                     onClick={() => setValue(field.id, opt)}
-                    className={`rounded-full border px-5 py-2 text-sm font-medium transition-colors duration-200 ${
+                    className={`border px-5 py-2 text-sm transition-colors duration-200 ${
                       values[field.id] === opt
-                        ? "border-accent bg-accent text-white"
-                        : "border-border bg-bg hover:border-accent"
+                        ? "border-ink bg-ink text-paper"
+                        : "border-line hover:border-ink"
                     }`}
                   >
                     {opt}
@@ -108,7 +108,7 @@ export default function ProductCustomizer({ productName, basePrice, fields }: Pr
 
             {field.type === "photo" && (
               <>
-                <label className="flex w-fit cursor-pointer items-center gap-3 rounded-full border border-border bg-bg px-5 py-2.5 text-sm font-medium transition-colors duration-200 hover:border-accent hover:text-accent">
+                <label className="flex w-fit cursor-pointer items-center gap-3 border border-line px-5 py-2.5 text-sm transition-colors duration-200 hover:border-ink">
                   <input
                     type="file"
                     accept="image/*"
@@ -118,7 +118,7 @@ export default function ProductCustomizer({ productName, basePrice, fields }: Pr
                   {values[field.id] ? "Αλλαγή φωτογραφίας" : "Ανέβασε φωτογραφία"}
                 </label>
                 {photoPreview && (
-                  <div className="relative mt-3 h-28 w-28 overflow-hidden rounded-lg border border-border">
+                  <div className="relative mt-3 h-28 w-28 overflow-hidden border border-line">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={photoPreview} alt="Προεπισκόπηση" className="h-full w-full object-cover" />
                   </div>
@@ -132,10 +132,10 @@ export default function ProductCustomizer({ productName, basePrice, fields }: Pr
                   <button
                     type="button"
                     onClick={() => setValue(field.id, true)}
-                    className={`rounded-full border px-5 py-2 text-sm font-medium transition-colors duration-200 ${
+                    className={`border px-5 py-2 text-sm transition-colors duration-200 ${
                       values[field.id] === true
-                        ? "border-accent bg-accent text-white"
-                        : "border-border bg-bg hover:border-accent"
+                        ? "border-ink bg-ink text-paper"
+                        : "border-line hover:border-ink"
                     }`}
                   >
                     {field.toggle_yes || "Ναι"}
@@ -146,10 +146,10 @@ export default function ProductCustomizer({ productName, basePrice, fields }: Pr
                       setValue(field.id, false);
                       setValue(`${field.id}_value`, "");
                     }}
-                    className={`rounded-full border px-5 py-2 text-sm font-medium transition-colors duration-200 ${
+                    className={`border px-5 py-2 text-sm transition-colors duration-200 ${
                       values[field.id] === false
-                        ? "border-accent bg-accent text-white"
-                        : "border-border bg-bg hover:border-accent"
+                        ? "border-ink bg-ink text-paper"
+                        : "border-line hover:border-ink"
                     }`}
                   >
                     {field.toggle_no || "Όχι"}
@@ -162,7 +162,7 @@ export default function ProductCustomizer({ productName, basePrice, fields }: Pr
                       value={(values[`${field.id}_value`] as string) || ""}
                       onChange={(e) => setValue(`${field.id}_value`, e.target.value)}
                       placeholder={field.placeholder}
-                      className="w-full max-w-md rounded-xl border border-border bg-bg px-4 py-3 text-sm outline-none transition-colors duration-200 focus:border-accent"
+                      className="w-full max-w-md border border-line bg-paper px-4 py-3 text-sm outline-none transition-colors duration-200 focus:border-ink"
                     />
                     {field.hint && (
                       <p className="mt-1.5 text-xs text-faint">{field.hint}</p>
@@ -175,26 +175,26 @@ export default function ProductCustomizer({ productName, basePrice, fields }: Pr
         </div>
       ))}
 
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
-        <div className="text-lg font-semibold text-accent">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
+        <div className="text-lg font-medium text-ember">
           {basePrice ? `${basePrice.toFixed(2)} €` : "[ΤΙΜΗ]"}
         </div>
         <button
           type="button"
           disabled={!canAdd}
           onClick={() => setAdded(true)}
-          className="rounded-full bg-accent px-7 py-3 text-sm font-semibold text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/25 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          className="bg-ink px-7 py-3 text-sm font-medium text-paper transition-colors duration-200 hover:bg-ember disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ink"
         >
           {added ? "Προστέθηκε ✓" : "Προσθήκη στο καλάθι"}
         </button>
       </div>
       {blockedToggle && (
-        <p className="-mt-4 text-xs text-accent-dark">
+        <p className="-mt-4 text-xs text-ember-dark">
           Συμπλήρωσε το πεδίο για «{blockedToggle.label}» για να συνεχίσεις.
         </p>
       )}
       {added && (
-        <p className="-mt-4 text-sm text-muted">
+        <p className="-mt-4 font-serif text-sm text-wood">
           Το «{productName}» προστέθηκε με τις επιλογές σου. Το καλάθι και η
           πληρωμή είναι το επόμενο κομμάτι που φτιάχνουμε.
         </p>

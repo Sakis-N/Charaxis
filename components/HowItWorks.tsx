@@ -18,19 +18,16 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="flex flex-col gap-11 px-6 py-14 md:px-16 md:pb-24">
-      <h2 className="text-center text-[28px] font-medium">Πώς δουλεύει</h2>
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+    <section className="flex flex-col gap-10 px-6 py-14 md:px-16 md:pb-24">
+      <h2 className="text-[26px] font-medium">Πώς δουλεύει</h2>
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:divide-x md:divide-line">
         {steps.map((step) => (
-          <div
-            key={step.n}
-            className="group flex flex-col items-center gap-3.5 text-center"
-          >
-            <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full border-[1.5px] border-accent bg-white font-display text-xl text-accent transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:bg-accent group-hover:text-white group-hover:shadow-lg group-hover:shadow-accent/20">
+          <div key={step.n} className="flex flex-col gap-3.5 md:px-8 md:first:pl-0">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-ink text-base transition-colors duration-200 group-hover:border-ember">
               {step.n}
             </div>
             <h3 className="text-[17px] font-semibold">{step.title}</h3>
-            <p className="max-w-[240px] text-[14.5px] leading-relaxed text-muted">
+            <p className="max-w-[260px] font-serif text-[15px] leading-relaxed text-wood">
               {step.text}
             </p>
           </div>

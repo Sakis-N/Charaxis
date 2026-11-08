@@ -35,7 +35,7 @@ export default function ProductGallery({ images, productName }: Props) {
 
   if (images.length === 0) {
     return (
-      <div className="placeholder-tile relative h-[320px] overflow-hidden rounded-2xl md:h-[480px]">
+      <div className="placeholder-tile relative h-[320px] overflow-hidden rounded-sm md:h-[480px]">
         <span className="inline-block">Φωτογραφία προϊόντος</span>
       </div>
     );
@@ -46,7 +46,7 @@ export default function ProductGallery({ images, productName }: Props) {
       <button
         type="button"
         onClick={() => setLightboxOpen(true)}
-        className="group relative h-[320px] cursor-zoom-in overflow-hidden rounded-2xl bg-border/40 md:h-[480px]"
+        className="group relative h-[320px] cursor-zoom-in overflow-hidden rounded-sm border border-line bg-line/40 md:h-[480px]"
         aria-label="Μεγέθυνση φωτογραφίας"
       >
         <Image
@@ -74,8 +74,8 @@ export default function ProductGallery({ images, productName }: Props) {
               key={src + i}
               type="button"
               onClick={() => setActive(i)}
-              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors duration-200 ${
-                i === active ? "border-accent" : "border-transparent hover:border-border"
+              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-sm border-2 transition-colors duration-200 ${
+                i === active ? "border-ink" : "border-transparent hover:border-line"
               }`}
               aria-label={`Φωτογραφία ${i + 1}`}
             >

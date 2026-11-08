@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
-import { Alegreya, Inter } from "next/font/google";
+import { Bricolage_Grotesque, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
-const alegreya = Alegreya({
+// Bricolage Grotesque — τίτλοι, navigation, τιμές, κουμπιά: η "μηχανική"
+// ακρίβεια του λέιζερ.
+const display = Bricolage_Grotesque({
   subsets: ["latin", "latin-ext", "greek"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-display",
   display: "swap",
 });
 
-const inter = Inter({
+// Source Serif 4 — μόνο για κυρίως κείμενο/περιγραφές: η ζεστασιά του
+// χειροποίητου.
+const serif = Source_Serif_4({
   subsets: ["latin", "latin-ext", "greek"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-inter",
+  weight: ["400", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-serif",
   display: "swap",
 });
 
@@ -29,8 +33,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="el" className={`${alegreya.variable} ${inter.variable}`}>
-      <body className="bg-bg font-sans text-ink antialiased">{children}</body>
+    <html lang="el" className={`${display.variable} ${serif.variable}`}>
+      <body className="bg-paper font-display text-ink antialiased">
+        {children}
+      </body>
     </html>
   );
 }

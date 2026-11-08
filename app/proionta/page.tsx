@@ -36,14 +36,12 @@ export default async function ProductsPage() {
     <main className="flex flex-col overflow-x-hidden">
       <Header />
       <section className="flex flex-col gap-9 px-6 py-12 md:px-16 md:py-16">
-        <h1 className="font-display text-[28px] font-medium md:text-[34px]">
-          Όλα τα προϊόντα
-        </h1>
+        <h1 className="text-[28px] font-medium md:text-[34px]">Όλα τα προϊόντα</h1>
 
         {products.length === 0 ? (
-          <p className="text-muted">
+          <p className="font-serif text-wood">
             Σύντομα εδώ — ή{" "}
-            <a href="#quote" className="text-accent underline underline-offset-2">
+            <a href="#quote" className="text-ink underline underline-offset-2 hover:text-ember">
               ζήτα προσφορά
             </a>{" "}
             για κάτι συγκεκριμένο.
@@ -53,19 +51,15 @@ export default async function ProductsPage() {
             {products.map((p) => {
               const img = p.images && p.images.length > 0 ? p.images[0] : null;
               return (
-                <Link
-                  key={p.id}
-                  href={`/proionta/${p.slug}`}
-                  className="group flex flex-col gap-2.5"
-                >
-                  <div className="relative h-[200px] overflow-hidden rounded-xl bg-border/40 transition-shadow duration-300 group-hover:shadow-xl group-hover:shadow-ink/10">
+                <Link key={p.id} href={`/proionta/${p.slug}`} className="group flex flex-col gap-2.5">
+                  <div className="relative h-[200px] overflow-hidden rounded-sm border border-line">
                     {img ? (
                       <Image
                         src={img}
                         alt={p.name}
                         fill
                         sizes="(min-width: 768px) 25vw, 50vw"
-                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="placeholder-tile h-full">
@@ -73,13 +67,10 @@ export default async function ProductsPage() {
                       </div>
                     )}
                   </div>
-                  <div className="text-[11px] font-semibold uppercase tracking-wider text-faint">
-                    {p.material || "Ξύλο"}
-                  </div>
-                  <h3 className="text-[15px] font-semibold leading-snug transition-colors duration-200 group-hover:text-accent">
+                  <h3 className="text-[15px] font-medium leading-snug transition-colors duration-200 group-hover:text-ember">
                     {p.name}
                   </h3>
-                  <div className="text-[15px] font-semibold text-accent">
+                  <div className="text-[15px] text-wood">
                     {p.base_price ? `${Number(p.base_price).toFixed(2)} €` : "[ΤΙΜΗ]"}
                   </div>
                 </Link>

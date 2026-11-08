@@ -51,9 +51,9 @@ export default async function ProductPage({
   return (
     <main className="flex flex-col overflow-x-hidden">
       <Header />
-      <section className="flex flex-col gap-3 px-6 pt-6 text-sm text-muted md:px-16">
+      <section className="flex flex-col gap-3 px-6 pt-6 text-sm text-wood md:px-16">
         <nav>
-          <Link href="/" className="transition-colors duration-200 hover:text-accent">
+          <Link href="/" className="transition-colors duration-200 hover:text-ember">
             Αρχική
           </Link>
           <span className="mx-2">/</span>
@@ -65,18 +65,18 @@ export default async function ProductPage({
         <ProductGallery images={images} productName={product.name} />
 
         <div className="flex flex-col gap-5">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+          <div className="text-[13px] text-wood">
             {product.material || "Ξύλο"}
             {product.dimensions ? ` · ${product.dimensions}` : ""}
           </div>
-          <h1 className="font-display text-[28px] font-medium leading-tight md:text-[34px]">
+          <h1 className="text-[28px] font-medium leading-tight md:text-[34px]">
             {product.name}
           </h1>
-          <div className="text-2xl font-semibold text-accent">
+          <div className="text-2xl font-medium text-ember">
             {price ? `${price.toFixed(2)} €` : "[ΤΙΜΗ]"}
           </div>
           {product.description && (
-            <p className="max-w-md text-[15px] leading-relaxed text-muted">
+            <p className="max-w-md font-serif text-[15px] leading-relaxed text-wood">
               {product.description}
             </p>
           )}
@@ -88,7 +88,7 @@ export default async function ProductPage({
               fields={product.custom_fields || []}
             />
           ) : (
-            <button className="w-fit rounded-full bg-accent px-7 py-3 text-sm font-semibold text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/25">
+            <button className="w-fit bg-ink px-7 py-3 text-sm font-medium text-paper transition-colors duration-200 hover:bg-ember">
               Προσθήκη στο καλάθι
             </button>
           )}
