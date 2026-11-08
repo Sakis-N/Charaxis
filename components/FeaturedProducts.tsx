@@ -1,9 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 
 type Product = {
   id: string;
   name: string;
+  slug: string;
   material: string | null;
   base_price: string | null;
   images: string[] | null;
@@ -21,7 +23,7 @@ async function getFeaturedProducts(): Promise<Product[]> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select("id, name, material, base_price, images")
+      .select("id, name, slug, material, base_price, images")
       .eq("active", true)
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false })
@@ -58,7 +60,11 @@ export default async function FeaturedProducts() {
         {products.map((p) => {
           const img = p.images && p.images.length > 0 ? p.images[0] : null;
           return (
-            <div key={p.id} className="group flex flex-col gap-2.5">
+            <Link
+              key={p.id}
+              href={`/proionta/${p.slug}`}
+              className="group flex flex-col gap-2.5"
+            >
               <div className="relative h-[200px] overflow-hidden rounded-xl bg-border/40 transition-shadow duration-300 group-hover:shadow-xl group-hover:shadow-ink/10">
                 {img ? (
                   <Image
@@ -83,7 +89,7 @@ export default async function FeaturedProducts() {
               <div className="text-[15px] font-semibold text-accent">
                 {p.base_price ? `${Number(p.base_price).toFixed(2)} €` : "[ΤΙΜΗ]"}
               </div>
-            </div>
+            </Link>
           );
         })}
 

@@ -1,0 +1,111 @@
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import ProductCustomizer from "@/components/ProductCustomizer";
+
+type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  material: string | null;
+  dimensions: string | null;
+  base_price: string | null;
+  images: string[] | null;
+  is_customizable: boolean;
+};
+
+async function getProduct(slug: string): Promise<Product | null> {
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select(
+        "id, name, slug, description, material, dimensions, base_price, images, is_customizable"
+      )
+      .eq("slug", slug)
+      .eq("active", true)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return data as Product;
+  } catch {
+    return null;
+  }
+}
+
+export default async function ProductPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const product = await getProduct(params.slug);
+  if (!product) notFound();
+
+  const img = product.images && product.images.length > 0 ? product.images[0] : null;
+  const price = product.base_price ? Number(product.base_price) : null;
+
+  return (
+    <main className="flex flex-col overflow-x-hidden">
+      <Header />
+      <section className="flex flex-col gap-3 px-6 pt-6 text-sm text-muted md:px-16">
+        <nav>
+          <Link href="/" className="transition-colors duration-200 hover:text-accent">
+            Αρχική
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-ink">{product.name}</span>
+        </nav>
+      </section>
+
+      <section className="grid grid-cols-1 gap-10 px-6 py-8 md:grid-cols-2 md:gap-14 md:px-16 md:py-12">
+        <div className="relative h-[320px] overflow-hidden rounded-2xl bg-border/40 md:h-[480px]">
+          {img ? (
+            <Image
+              src={img}
+              alt={product.name}
+              fill
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <div className="placeholder-tile h-full">
+              <span className="inline-block">Φωτογραφία προϊόντος</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-5">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-faint">
+            {product.material || "Ξύλο"}
+            {product.dimensions ? ` · ${product.dimensions}` : ""}
+          </div>
+          <h1 className="font-display text-[28px] font-medium leading-tight md:text-[34px]">
+            {product.name}
+          </h1>
+          <div className="text-2xl font-semibold text-accent">
+            {price ? `${price.toFixed(2)} €` : "[ΤΙΜΗ]"}
+          </div>
+          {product.description && (
+            <p className="max-w-md text-[15px] leading-relaxed text-muted">
+              {product.description}
+            </p>
+          )}
+
+          {product.is_customizable ? (
+            <ProductCustomizer productName={product.name} basePrice={price} />
+          ) : (
+            <button className="w-fit rounded-full bg-accent px-7 py-3 text-sm font-semibold text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/25">
+              Προσθήκη στο καλάθι
+            </button>
+          )}
+        </div>
+      </section>
+
+      <Footer />
+    </main>
+  );
+}
