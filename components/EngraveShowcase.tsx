@@ -6,8 +6,8 @@ export default function EngraveShowcase() {
       <div className="flex flex-col gap-4">
         <h2 className="text-[26px] font-medium">Από τη φωτογραφία σου, στο ξύλο</h2>
         <p className="max-w-[420px] font-serif text-[17px] leading-relaxed text-wood">
-          Ανέβασε μια φωτογραφία και δες αμέσως πώς θα φαινόταν χαραγμένη σε
-          ξύλο. Σύρε το slider για να τη συγκρίνεις με την αρχική.
+          Ανέβασε μια φωτογραφία και δες αμέσως το σκίτσο που θα χαράξουμε, με
+          αφαίρεση φόντου. Σύρε το slider για να το συγκρίνεις με την αρχική.
         </p>
       </div>
       <BeforeAfter />

@@ -9,9 +9,32 @@ type Props = {
   afterLabel?: string;
 };
 
-// Μετατρέπει τη φωτογραφία σε "χαραγμένη σε ξύλο": ασπρόμαυρο με αντίθεση,
-// όπου τα σκούρα σημεία γίνονται καμένο καφέ πάνω σε ανοιχτό ξύλο.
-function engrave(img: HTMLImageElement): string {
+// Σκίτσο μολυβιού: το φόντο με πλακέ χρώμα γίνεται λευκό και μένουν οι
+// γραμμές (κλασική μέθοδος: αντιστροφή + θόλωμα + color dodge).
+function boxBlur(src: Float32Array, w: number, h: number, r: number): Float32Array {
+  const tmp = new Float32Array(src.length);
+  const out = new Float32Array(src.length);
+  const k = 2 * r + 1;
+  for (let y = 0; y < h; y++) {
+    let sum = 0;
+    for (let x = -r; x <= r; x++) sum += src[y * w + Math.min(w - 1, Math.max(0, x))];
+    for (let x = 0; x < w; x++) {
+      tmp[y * w + x] = sum / k;
+      sum += src[y * w + Math.min(w - 1, x + r + 1)] - src[y * w + Math.max(0, x - r)];
+    }
+  }
+  for (let x = 0; x < w; x++) {
+    let sum = 0;
+    for (let y = -r; y <= r; y++) sum += tmp[Math.min(h - 1, Math.max(0, y)) * w + x];
+    for (let y = 0; y < h; y++) {
+      out[y * w + x] = sum / k;
+      sum += tmp[Math.min(h - 1, y + r + 1) * w + x] - tmp[Math.max(0, y - r) * w + x];
+    }
+  }
+  return out;
+}
+
+function sketch(img: HTMLImageElement): string {
   const max = 900;
   const s = Math.min(1, max / Math.max(img.width, img.height));
   const w = Math.max(1, Math.round(img.width * s));
@@ -24,25 +47,40 @@ function engrave(img: HTMLImageElement): string {
   ctx.drawImage(img, 0, 0, w, h);
   const data = ctx.getImageData(0, 0, w, h);
   const px = data.data;
-  for (let i = 0; i < px.length; i += 4) {
-    const lum = (0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]) / 255;
-    let v = (lum - 0.5) * 1.55 + 0.5;
-    v = Math.min(1, Math.max(0, v));
-    const burn = 1 - Math.pow(v, 1.1);
-    px[i] = 224 + (52 - 224) * burn;
-    px[i + 1] = 203 + (30 - 203) * burn;
-    px[i + 2] = 162 + (14 - 162) * burn;
-    px[i + 3] = 255;
+
+  const gray = new Float32Array(w * h);
+  const inv = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    const g = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
+    gray[i] = g;
+    inv[i] = 255 - g;
+  }
+  const r = Math.max(2, Math.round(Math.max(w, h) / 150));
+  const blur = boxBlur(boxBlur(inv, w, h, r), w, h, r);
+
+  const m = Math.round(Math.max(w, h) * 0.05);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = y * w + x;
+      let v = Math.min(255, (gray[i] * 255) / (255 - blur[i] + 1));
+      v = Math.pow(v / 255, 1.9) * 255;
+      if (v > 235) v = 255;
+      if (x < m || y < m || x >= w - m || y >= h - m) v = 255;
+      px[i * 4] = v;
+      px[i * 4 + 1] = v;
+      px[i * 4 + 2] = v;
+      px[i * 4 + 3] = 255;
+    }
   }
   ctx.putImageData(data, 0, 0);
-  return canvas.toDataURL("image/jpeg", 0.88);
+  return canvas.toDataURL("image/jpeg", 0.9);
 }
 
 export default function BeforeAfter({
   beforeSrc,
   afterSrc,
   beforeLabel = "Η φωτογραφία σου",
-  afterLabel = "Χαραγμένο σε ξύλο",
+  afterLabel = "Σκίτσο, χωρίς φόντο",
 }: Props) {
   const [pos, setPos] = useState(50);
   const [custom, setCustom] = useState<{ before: string; after: string } | null>(null);
@@ -53,7 +91,7 @@ export default function BeforeAfter({
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
-      setCustom({ before: url, after: engrave(img) });
+      setCustom({ before: url, after: sketch(img) });
       setPos(50);
     };
     img.src = url;
@@ -70,7 +108,7 @@ export default function BeforeAfter({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={after} alt={afterLabel} className="absolute inset-0 h-full w-full object-cover" />
         ) : (
-          <div className="wood-panel absolute inset-0 flex items-center justify-center font-serif text-[18px] italic text-wood">
+          <div className="absolute inset-0 flex bg-white items-center justify-center font-serif text-[18px] italic text-wood">
             {afterLabel}
           </div>
         )}
