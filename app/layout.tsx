@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Source_Serif_4 } from "next/font/google";
+import { Manrope, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
-// Bricolage Grotesque — τίτλοι, navigation, τιμές, κουμπιά: η "μηχανική"
-// ακρίβεια του λέιζερ. Variable font — δεν ορίζουμε discrete weights,
-// ώστε να φορτώνει κανονικά ως variable instance.
-const display = Bricolage_Grotesque({
+// Manrope — τίτλοι, navigation, τιμές, κουμπιά: καθαρή, "μηχανική"
+// ακρίβεια, με πλήρη ελληνικά. Variable font — δεν ορίζουμε discrete
+// weights, ώστε να φορτώνει κανονικά ως variable instance.
+const display = Manrope({
   subsets: ["latin", "latin-ext", "greek"],
   variable: "--font-display",
   display: "swap",
