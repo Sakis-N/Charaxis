@@ -93,7 +93,7 @@ export default function ProductGallery({ images, productName }: Props) {
           <button
             type="button"
             onClick={close}
-            className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-white/20"
+            className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-white/20"
             aria-label="Κλείσιμο"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -109,7 +109,7 @@ export default function ProductGallery({ images, productName }: Props) {
                   e.stopPropagation();
                   prev();
                 }}
-                className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-white/20 md:left-6"
+                className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-white/20 md:left-6"
                 aria-label="Προηγούμενη"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -122,7 +122,7 @@ export default function ProductGallery({ images, productName }: Props) {
                   e.stopPropagation();
                   next();
                 }}
-                className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-white/20 md:right-6"
+                className="absolute right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-200 hover:bg-white/20 md:right-6"
                 aria-label="Επόμενη"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -132,21 +132,19 @@ export default function ProductGallery({ images, productName }: Props) {
             </>
           )}
 
-          <div
-            className="relative h-[85vh] w-full max-w-3xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative h-[85vh] w-full max-w-3xl">
             <Image
               src={images[active]}
               alt={`${productName} — φωτογραφία ${active + 1}`}
               fill
               sizes="90vw"
               className="object-contain"
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
 
           {images.length > 1 && (
-            <span className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs text-white">
+            <span className="absolute bottom-5 left-1/2 z-10 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs text-white">
               {active + 1} / {images.length}
             </span>
           )}
