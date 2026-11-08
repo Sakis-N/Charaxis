@@ -1,5 +1,6 @@
 import EngraveMark from "@/components/icons/EngraveMark";
 import LaserPanel from "@/components/LaserPanel";
+import PanelDoodles from "@/components/PanelDoodles";
 
 export default function Hero() {
   return (
@@ -32,6 +33,7 @@ export default function Hero() {
       </div>
 
       <LaserPanel>
+        <PanelDoodles />
         <EngraveMark />
       </LaserPanel>
     </section>
