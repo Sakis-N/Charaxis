@@ -30,7 +30,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="wood-panel flex min-w-0 flex-1 basis-[420px] items-center justify-center rounded-sm" style={{ aspectRatio: "4 / 3" }}>
+      <div className="wood-panel group flex min-w-0 flex-1 basis-[420px] items-center justify-center rounded-sm" style={{ aspectRatio: "4 / 3" }}>
         <EngraveMark />
       </div>
     </section>

@@ -4,8 +4,8 @@
 export default function EngraveMark() {
   return (
     <svg
-      viewBox="0 0 200 200"
-      className="h-[120px] w-[120px] md:h-[150px] md:w-[150px]"
+      viewBox="28 34 144 124"
+      className="h-auto w-[72%] max-w-[420px] transition-transform duration-500 ease-out group-hover:-rotate-3 group-hover:scale-105"
       aria-hidden="true"
     >
       <g transform="rotate(-6 100 100)">
@@ -35,6 +35,7 @@ export default function EngraveMark() {
         />
       </g>
 
+      <g className="origin-center [transform-box:fill-box] transition-transform duration-300 ease-out group-hover:scale-125">
       <path
         d="M100 134 C86 120, 74 111, 74 99 C74 89, 82 82, 91 85 C96 87, 99 90, 100 96 C101 90, 104 87, 109 85 C118 82, 126 89, 126 99 C126 111, 114 120, 100 134 Z"
         fill="none"
@@ -49,6 +50,7 @@ export default function EngraveMark() {
         fill="#E2430F"
         className="engrave-fill"
       />
+      </g>
     </svg>
   );
 }
