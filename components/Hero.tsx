@@ -1,4 +1,5 @@
 import EngraveMark from "@/components/icons/EngraveMark";
+import LaserPanel from "@/components/LaserPanel";
 
 export default function Hero() {
   return (
@@ -30,9 +31,9 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="wood-panel group flex min-w-0 flex-1 basis-[420px] items-center justify-center rounded-sm" style={{ aspectRatio: "4 / 3" }}>
+      <LaserPanel>
         <EngraveMark />
-      </div>
+      </LaserPanel>
     </section>
   );
 }

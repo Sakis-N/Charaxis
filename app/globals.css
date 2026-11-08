@@ -102,3 +102,30 @@
     animation: burn-in 0.9s ease-out both;
   }
 }
+
+/* Σημάδι καψίματος του λέιζερ: λάμπει → μαυρίζει → σβήνει. */
+@keyframes laser-burn {
+  0% {
+    opacity: 1;
+    background: #ff7a2f;
+    box-shadow: 0 0 12px 4px rgba(226, 67, 15, 0.9);
+  }
+  20% {
+    background: #e2430f;
+    box-shadow: 0 0 8px 2px rgba(226, 67, 15, 0.5);
+  }
+  45% {
+    opacity: 0.85;
+    background: #2a1608;
+    box-shadow: none;
+  }
+  100% {
+    opacity: 0;
+    background: #2a1608;
+    box-shadow: none;
+  }
+}
+
+.laser-mark {
+  animation: laser-burn 5s ease-out forwards;
+}

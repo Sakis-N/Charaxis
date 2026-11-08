@@ -4,8 +4,8 @@
 export default function EngraveMark() {
   return (
     <svg
-      viewBox="28 34 144 124"
-      className="h-auto w-[72%] max-w-[420px] transition-transform duration-500 ease-out group-hover:-rotate-3 group-hover:scale-105"
+      viewBox="0 0 200 200"
+      className="h-[120px] w-[120px] transition-transform md:h-[150px] md:w-[150px] duration-500 ease-out group-hover:-rotate-3 group-hover:scale-105"
       aria-hidden="true"
     >
       <g transform="rotate(-6 100 100)">
