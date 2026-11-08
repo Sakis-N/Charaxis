@@ -6,6 +6,9 @@ import FeaturedProducts from "@/components/FeaturedProducts";
 import QuoteBand from "@/components/QuoteBand";
 import Footer from "@/components/Footer";
 
+// Οι αλλαγές από το admin εμφανίζονται στο site μέσα σε ~1 λεπτό, χωρίς νέο deploy.
+export const revalidate = 60;
+
 export default function HomePage() {
   return (
     <main className="flex flex-col overflow-x-hidden">

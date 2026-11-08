@@ -4,6 +4,9 @@ import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+// Οι αλλαγές από το admin εμφανίζονται στο site μέσα σε ~1 λεπτό, χωρίς νέο deploy.
+export const revalidate = 60;
+
 type Product = {
   id: string;
   name: string;

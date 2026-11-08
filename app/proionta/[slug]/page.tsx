@@ -8,6 +8,9 @@ import ProductCustomizer, { type CustomField } from "@/components/ProductCustomi
 import ProductGallery from "@/components/ProductGallery";
 import AddToCartButton from "@/components/AddToCartButton";
 
+// Οι αλλαγές από το admin εμφανίζονται στο site μέσα σε ~1 λεπτό, χωρίς νέο deploy.
+export const revalidate = 60;
+
 type Product = {
   id: string;
   name: string;

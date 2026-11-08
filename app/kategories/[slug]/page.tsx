@@ -6,6 +6,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard, { type CardProduct } from "@/components/ProductCard";
 
+// Οι αλλαγές από το admin εμφανίζονται στο site μέσα σε ~1 λεπτό, χωρίς νέο deploy.
+export const revalidate = 60;
+
 type Category = { id: string; name: string; slug: string; description: string | null };
 
 async function getData(slug: string) {

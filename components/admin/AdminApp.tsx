@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase/client";
+import ProductsAdmin from "@/components/admin/ProductsAdmin";
+import SettingsAdmin from "@/components/admin/SettingsAdmin";
 
 type Design = { fields?: { id: string; label: string; value: string }[]; photos?: { field: string; path: string }[] } | null;
 type OrderItem = { id: string; product_name_snapshot: string; quantity: number; line_total: number; custom_design: Design };
@@ -315,7 +317,7 @@ function Coupons() {
 
 export default function AdminApp() {
   const [state, setState] = useState<"loading" | "out" | "denied" | "in">("loading");
-  const [tab, setTab] = useState<"orders" | "quotes" | "messages" | "coupons">("orders");
+  const [tab, setTab] = useState<"orders" | "products" | "quotes" | "messages" | "coupons" | "settings">("orders");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -361,7 +363,7 @@ export default function AdminApp() {
     );
   }
 
-  const tabs = [["orders", "Παραγγελίες"], ["quotes", "Προσφορές"], ["messages", "Μηνύματα"], ["coupons", "Κουπόνια"]] as const;
+  const tabs = [["orders", "Παραγγελίες"], ["products", "Προϊόντα"], ["quotes", "Προσφορές"], ["messages", "Μηνύματα"], ["coupons", "Κουπόνια"], ["settings", "Μεταφορικά"]] as const;
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-6 px-5 py-8">
       <header className="flex flex-wrap items-center justify-between gap-3 print:hidden">
@@ -374,7 +376,9 @@ export default function AdminApp() {
         ))}
       </nav>
       {tab === "orders" && <Orders />}
+      {tab === "products" && <ProductsAdmin />}
       {tab === "quotes" && <Quotes />}
+      {tab === "settings" && <SettingsAdmin />}
       {tab === "messages" && <Messages />}
       {tab === "coupons" && <Coupons />}
     </main>
