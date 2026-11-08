@@ -52,7 +52,7 @@ export default async function ProductsPage() {
               const img = p.images && p.images.length > 0 ? p.images[0] : null;
               return (
                 <Link key={p.id} href={`/proionta/${p.slug}`} className="group flex flex-col gap-2.5">
-                  <div className="relative h-[200px] overflow-hidden rounded-sm border border-line">
+                  <div className="relative h-[200px] overflow-hidden rounded-sm border border-line after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-ember after:transition-transform after:duration-500 group-hover:after:scale-x-100">
                     {img ? (
                       <Image
                         src={img}

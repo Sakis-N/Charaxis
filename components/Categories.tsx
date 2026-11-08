@@ -11,7 +11,7 @@ export default function Categories() {
       <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-4">
         {categories.map((cat) => (
           <a key={cat.name} href={cat.href} className="group flex flex-col gap-3.5">
-            <div className="placeholder-tile h-[220px] overflow-hidden rounded-sm">
+            <div className="placeholder-tile relative h-[220px] overflow-hidden rounded-sm after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-ember after:transition-transform after:duration-500 group-hover:after:scale-x-100">
               <span className="inline-block">{cat.name}</span>
             </div>
             <div className="flex items-center justify-between border-t border-line pt-3">

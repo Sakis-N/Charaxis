@@ -76,3 +76,29 @@
     animation: engrave-glow 0.7s ease-out 1.75s both;
   }
 }
+
+/* Κάθε γράμμα που γράφει ο πελάτης "καίγεται" πάνω στο ξύλο: ξεκινά
+   πορτοκαλί/λαμπερό και κρυώνει σε καμένο καφέ-μαύρο. */
+@keyframes burn-in {
+  0% {
+    opacity: 0;
+    color: #e2430f;
+    text-shadow: 0 0 10px rgba(226, 67, 15, 0.9);
+  }
+  55% {
+    opacity: 1;
+    color: #e2430f;
+    text-shadow: 0 0 6px rgba(226, 67, 15, 0.6);
+  }
+  100% {
+    opacity: 1;
+    color: #1b1714;
+    text-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .burn-char {
+    animation: burn-in 0.9s ease-out both;
+  }
+}

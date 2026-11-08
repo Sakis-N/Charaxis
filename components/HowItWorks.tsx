@@ -1,3 +1,5 @@
+import StepBadge from "@/components/StepBadge";
+
 const steps = [
   {
     n: 1,
@@ -23,9 +25,7 @@ export default function HowItWorks() {
       <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:divide-x md:divide-line">
         {steps.map((step) => (
           <div key={step.n} className="flex flex-col gap-3.5 md:px-8 md:first:pl-0">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-ink text-base transition-colors duration-200 group-hover:border-ember">
-              {step.n}
-            </div>
+            <StepBadge n={step.n} />
             <h3 className="text-[17px] font-semibold">{step.title}</h3>
             <p className="max-w-[260px] font-serif text-[15px] leading-relaxed text-wood">
               {step.text}

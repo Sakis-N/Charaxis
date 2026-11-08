@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
+import EngraveShowcase from "@/components/EngraveShowcase";
 import Categories from "@/components/Categories";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import Testimonial from "@/components/Testimonial";
@@ -12,6 +13,7 @@ export default function HomePage() {
       <Header />
       <Hero />
       <HowItWorks />
+      <EngraveShowcase />
       <Categories />
       <FeaturedProducts />
       <Testimonial />

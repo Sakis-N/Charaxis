@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const navLinks = [
@@ -12,6 +12,25 @@ const navLinks = [
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const [bump, setBump] = useState(false);
+
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined;
+    let t2: ReturnType<typeof setTimeout> | undefined;
+    function onAdd() {
+      // Το bump παίζει όταν "φτάνει" η κουκκίδα (~700ms).
+      t = setTimeout(() => {
+        setBump(true);
+        t2 = setTimeout(() => setBump(false), 350);
+      }, 650);
+    }
+    window.addEventListener("cart:add", onAdd);
+    return () => {
+      window.removeEventListener("cart:add", onAdd);
+      if (t) clearTimeout(t);
+      if (t2) clearTimeout(t2);
+    };
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-paper/95">
@@ -38,8 +57,11 @@ export default function Header() {
 
         <div className="flex items-center gap-4 md:gap-5">
           <button
+            id="cart-button"
             aria-label="Καλάθι"
-            className="flex items-center gap-2 border border-ink px-4 py-2 text-sm font-medium transition-colors duration-200 hover:border-ember hover:text-ember md:px-5"
+            className={`flex items-center gap-2 border px-4 py-2 text-sm font-medium transition-all duration-200 hover:border-ember hover:text-ember md:px-5 ${
+              bump ? "scale-110 border-ember text-ember" : "border-ink"
+            }`}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
