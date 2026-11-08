@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useCart } from "@/lib/cart";
 
 const navLinks = [
   { href: "#categories", label: "Κατηγορίες" },
@@ -13,6 +14,7 @@ const navLinks = [
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [bump, setBump] = useState(false);
+  const { count, ready } = useCart();
 
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | undefined;
@@ -56,8 +58,9 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4 md:gap-5">
-          <button
+          <Link
             id="cart-button"
+            href="/kalathi"
             aria-label="Καλάθι"
             className={`flex items-center gap-2 border px-4 py-2 text-sm font-medium transition-all duration-200 hover:border-ember hover:text-ember md:px-5 ${
               bump ? "scale-110 border-ember text-ember" : "border-ink"
@@ -75,7 +78,12 @@ export default function Header() {
               <circle cx="18" cy="21" r="1.4" fill="currentColor" />
             </svg>
             <span className="hidden sm:inline">Καλάθι</span>
-          </button>
+            {ready && count > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-ember px-1.5 text-[11px] font-semibold text-paper">
+                {count}
+              </span>
+            )}
+          </Link>
 
           {/* Mobile menu toggle */}
           <button

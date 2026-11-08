@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
+import { CartProvider } from "@/lib/cart";
 
 // Manrope — τίτλοι, navigation, τιμές, κουμπιά: καθαρή, "μηχανική"
 // ακρίβεια, με πλήρη ελληνικά. Variable font — δεν ορίζουμε discrete
@@ -34,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="el" className={`${display.variable} ${serif.variable}`}>
       <body className="bg-paper font-display text-ink antialiased">
-        {children}
+        <CartProvider>{children}</CartProvider>
       </body>
     </html>
   );

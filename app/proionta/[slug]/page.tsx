@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCustomizer, { type CustomField } from "@/components/ProductCustomizer";
 import ProductGallery from "@/components/ProductGallery";
+import AddToCartButton from "@/components/AddToCartButton";
 
 type Product = {
   id: string;
@@ -83,14 +84,21 @@ export default async function ProductPage({
 
           {product.is_customizable ? (
             <ProductCustomizer
+              productId={product.id}
+              slug={product.slug}
+              image={images[0] ?? null}
               productName={product.name}
               basePrice={price}
               fields={product.custom_fields || []}
             />
           ) : (
-            <button className="w-fit bg-ink px-7 py-3 text-sm font-medium text-paper transition-colors duration-200 hover:bg-ember">
-              Προσθήκη στο καλάθι
-            </button>
+            <AddToCartButton
+              productId={product.id}
+              slug={product.slug}
+              name={product.name}
+              image={images[0] ?? null}
+              price={price ?? 0}
+            />
           )}
         </div>
       </section>
