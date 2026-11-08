@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ProductCustomizer from "@/components/ProductCustomizer";
+import ProductCustomizer, { type CustomField } from "@/components/ProductCustomizer";
 
 type Product = {
   id: string;
@@ -16,6 +16,7 @@ type Product = {
   base_price: string | null;
   images: string[] | null;
   is_customizable: boolean;
+  custom_fields: CustomField[] | null;
 };
 
 async function getProduct(slug: string): Promise<Product | null> {
@@ -23,7 +24,7 @@ async function getProduct(slug: string): Promise<Product | null> {
     const { data, error } = await supabase
       .from("products")
       .select(
-        "id, name, slug, description, material, dimensions, base_price, images, is_customizable"
+        "id, name, slug, description, material, dimensions, base_price, images, is_customizable, custom_fields"
       )
       .eq("slug", slug)
       .eq("active", true)
@@ -96,7 +97,11 @@ export default async function ProductPage({
           )}
 
           {product.is_customizable ? (
-            <ProductCustomizer productName={product.name} basePrice={price} />
+            <ProductCustomizer
+              productName={product.name}
+              basePrice={price}
+              fields={product.custom_fields || []}
+            />
           ) : (
             <button className="w-fit rounded-full bg-accent px-7 py-3 text-sm font-semibold text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/25">
               Προσθήκη στο καλάθι
