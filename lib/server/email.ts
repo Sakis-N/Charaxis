@@ -22,8 +22,8 @@ export async function sendEmail(opts: { to: string; subject: string; html: strin
   }
 }
 
-export const esc = (s: unknown) =>
-  String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+const ESC: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+export const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ESC[c] ?? c);
 
 export function layout(title: string, body: string) {
   return `<!doctype html><html lang="el"><body style="margin:0;background:#F2EEE2;font-family:Arial,Helvetica,sans-serif;color:#1B1714">
