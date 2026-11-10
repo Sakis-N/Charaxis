@@ -5,7 +5,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase/client";
-import { BANK } from "@/lib/business";
+import { BANK, IRIS } from "@/lib/business";
 
 type Order = {
   id: string;
@@ -75,6 +75,20 @@ export default function OrderPage({ params }: { params: { id: string } }) {
             <p className="font-serif text-wood">
               Θα λάβεις ενημέρωση στο {order.customer_email}. Φύλαξε αυτόν τον σύνδεσμο για να βλέπεις την κατάσταση.
             </p>
+
+            {order.payment_provider === "iris" && order.payment_status !== "paid" && (
+              <div className="flex flex-col gap-3 border border-ink p-5 text-sm">
+                <div className="font-medium">Πληρωμή με IRIS</div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={IRIS.qr} alt="IRIS QR" width={220} height={220} className="h-auto w-[220px] max-w-full border border-line" />
+                <ol className="flex list-decimal flex-col gap-1 pl-5">
+                  <li>Άνοιξε την εφαρμογή της τράπεζάς σου και διάλεξε πληρωμή με IRIS / σάρωση QR.</li>
+                  <li>Σάρωσε τον κωδικό και γράψε το ποσό: <span className="font-medium text-ember">{Number(order.total).toFixed(2)} €</span></li>
+                  <li>Στο σχόλιο γράψε τον αριθμό παραγγελίας: <span className="font-medium">#{shortId}</span></li>
+                </ol>
+                <div className="text-wood">Ξεκινάμε την παραγωγή μόλις εμφανιστεί η πληρωμή στον λογαριασμό μας.</div>
+              </div>
+            )}
 
             {order.payment_provider === "bank_transfer" && order.payment_status !== "paid" && (
               <div className="flex flex-col gap-2 border border-ink p-5 text-sm">

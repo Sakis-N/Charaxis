@@ -84,7 +84,7 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
     reload();
   }
 
-  const unpaidBank = o.payment_provider === "bank_transfer" && o.payment_status !== "paid";
+  const unpaidBank = (o.payment_provider === "bank_transfer" || o.payment_provider === "iris") && o.payment_status !== "paid";
 
   return (
     <div className="border border-line">
@@ -96,7 +96,7 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
         </span>
         <span className="flex items-center gap-3">
           <span className={o.payment_status === "paid" ? "text-green-700" : "text-ember-dark"}>
-            {o.payment_status === "paid" ? "Πληρωμένη" : o.payment_provider === "stripe" ? "Αναμονή κάρτας" : "Αναμονή κατάθεσης"}
+            {o.payment_status === "paid" ? "Πληρωμένη" : o.payment_provider === "stripe" ? "Αναμονή κάρτας" : o.payment_provider === "iris" ? "Αναμονή IRIS" : "Αναμονή κατάθεσης"}
           </span>
           <span className="border border-line px-2 py-0.5">{STATUSES[o.status] ?? o.status}</span>
           <b>{money(o.total)}</b>
@@ -150,7 +150,7 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
             </button>
             {unpaidBank && (
               <button className={btn} disabled={busy} onClick={() => update({ payment_status: "paid", status: o.status === "pending" ? "paid" : o.status }, "paid")}>
-                Η κατάθεση ήρθε ✓ (+email)
+                Η πληρωμή ήρθε ✓ (+email)
               </button>
             )}
           </div>

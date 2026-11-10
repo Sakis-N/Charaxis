@@ -24,6 +24,11 @@ export const DELIVERY_TIMES: Record<string, string> = {
   skroutz: "2–4 εργάσιμες ημέρες",
 };
 
+export const IRIS = {
+  enabled: process.env.NEXT_PUBLIC_IRIS_ENABLED === "true",
+  qr: "/iris-qr.png",
+};
+
 export const BANK = {
   iban: env(process.env.NEXT_PUBLIC_BANK_IBAN),
   name: env(process.env.NEXT_PUBLIC_BANK_NAME),

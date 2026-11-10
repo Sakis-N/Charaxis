@@ -82,7 +82,12 @@ export async function notifyOrderCreated(orderId: string): Promise<"sent" | "ski
   const a = o.shipping_address || {};
 
   const bankBlock =
-    o.payment_provider === "bank_transfer"
+    o.payment_provider === "iris"
+      ? `<div style="border:1px solid #1B1714;padding:14px;margin:16px 0;font-size:14px;line-height:1.7"><b>Πληρωμή με IRIS</b><br>
+Άνοιξε τη σελίδα της παραγγελίας για να δεις τον κωδικό QR, σάρωσέ τον από την εφαρμογή της τράπεζάς σου και γράψε:<br>
+Ποσό: <b>${money(o.total)}</b><br>Αιτιολογία: <b>#${sid}</b></div>
+<p style="font-size:14px">Ξεκινάμε την παραγωγή μόλις εμφανιστεί η πληρωμή.</p>`
+      : o.payment_provider === "bank_transfer"
       ? `<div style="border:1px solid #1B1714;padding:14px;margin:16px 0;font-size:14px;line-height:1.7"><b>Στοιχεία κατάθεσης</b><br>
 ${BANK.name ? `Τράπεζα: ${esc(BANK.name)}<br>` : ""}${BANK.holder ? `Δικαιούχος: ${esc(BANK.holder)}<br>` : ""}${BANK.iban ? `IBAN: <b>${esc(BANK.iban)}</b><br>` : "Θα σου στείλουμε τα στοιχεία λογαριασμού σε ξεχωριστό email.<br>"}
 Ποσό: <b>${money(o.total)}</b><br>Αιτιολογία: <b>#${sid}</b></div>
