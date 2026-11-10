@@ -5,7 +5,7 @@ const env = (v: string | undefined) => (v && v.trim() !== "" ? v.trim() : null);
 
 export const BUSINESS = {
   brand: "Charaxis",
-  email: env(process.env.NEXT_PUBLIC_CONTACT_EMAIL) ?? "info@charaxis.gr",
+  email: env(process.env.NEXT_PUBLIC_CONTACT_EMAIL) ?? "info@e-charaxis.gr",
   phone: env(process.env.NEXT_PUBLIC_PHONE),
   legalName: env(process.env.NEXT_PUBLIC_BUSINESS_NAME),
   afm: env(process.env.NEXT_PUBLIC_BUSINESS_AFM),
