@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
-import EngravePreview from "@/components/EngravePreview";
 import PhotoEngravePreview, { type PreviewArea } from "@/components/PhotoEngravePreview";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
@@ -131,12 +130,9 @@ export default function ProductCustomizer({ productId, slug, image, productName,
     <div className="flex flex-col gap-8 border border-line bg-paper p-6 md:p-8">
       <h2 className="text-xl font-semibold">Προσαρμόσε το σχέδιο</h2>
 
-      {hasTextFields &&
-        (previewArea && image ? (
-          <PhotoEngravePreview image={image} area={previewArea} lines={previewLines} />
-        ) : (
-          <EngravePreview lines={previewLines} />
-        ))}
+      {hasTextFields && previewArea && image && (
+        <PhotoEngravePreview image={image} area={previewArea} lines={previewLines} />
+      )}
 
       {fields.map((field, idx) => (
         <div key={field.id} className="flex flex-col gap-3">
