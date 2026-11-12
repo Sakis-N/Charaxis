@@ -170,14 +170,29 @@ ${o.notes ? `<div style="${box}"><div style="${lab}">Σημειώσεις πελ
 export async function notifyOrderPaid(orderId: string) {
   const o = await loadOrder(orderId);
   if (!o || o.payment_provider === "stripe") return; // η κάρτα καλύπτεται από το notifyOrderCreated
+  const sid = shortId(o.id);
+  const first = o.customer_name.split(" ")[0];
+  const step = (n: number, t: string, d: string) =>
+    `<tr><td style="vertical-align:top;padding:6px 12px 6px 0;font-weight:700;color:#E2430F">${n}.</td><td style="padding:6px 0;font-size:14px;line-height:1.5"><b>${t}</b> ${d}</td></tr>`;
   await sendEmail({
     to: o.customer_email,
     replyTo: BUSINESS.email,
-    subject: `Λάβαμε την πληρωμή σου — #${shortId(o.id)}`,
+    subject: `Λάβαμε την πληρωμή σου — ξεκινάμε την παραγωγή! (#${sid})`,
     html: layout(
-      "Η κατάθεση εμφανίστηκε ✓",
-      `<p style="font-size:14px;line-height:1.6">Ευχαριστούμε! Ξεκινάμε την παραγωγή της παραγγελίας <b>#${shortId(o.id)}</b>. Χρόνος παραγωγής: ${PRODUCTION_TIME}.</p>
-<p><a href="${SITE_URL}/paraggelia/${o.id}" style="color:#E2430F">Κατάσταση παραγγελίας</a></p>`
+      `Ευχαριστούμε, ${esc(first)}!`,
+      `<p style="font-size:14px;line-height:1.6">Η πληρωμή σου για την παραγγελία <b>#${sid}</b> εμφανίστηκε και ξεκινάμε να φτιάχνουμε το κομμάτι σου.</p>
+<div style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#8A7A62;margin:18px 0 6px">Η παραγγελία σου</div>
+<table style="width:100%;border-collapse:collapse;font-size:14px">${itemsHtml(o, true)}
+<tr><td style="padding:6px 0;color:#8A7A62">Μεταφορικά</td><td style="text-align:right">${money(o.shipping_cost)}</td></tr>
+<tr><td style="padding:8px 0;font-weight:700">Σύνολο</td><td style="text-align:right;font-weight:700">${money(o.total)} <span style="color:#2E7D32">✓ Πληρώθηκε</span></td></tr></table>
+<div style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#8A7A62;margin:22px 0 6px">Τι ακολουθεί</div>
+<table style="border-collapse:collapse">
+${step(1, "Παραγωγή:", `συνήθως ${PRODUCTION_TIME}. Κάθε κομμάτι χαράσσεται και ελέγχεται ένα-ένα.`)}
+${step(2, "Αποστολή:", "μόλις είναι έτοιμο θα λάβεις email με τον αριθμό αποστολής (tracking).")}
+${step(3, "Παράδοση:", `${esc(METHOD[o.shipping_method] ?? o.shipping_method)} — ${DELIVERY_TIMES[o.shipping_method] ?? "σύντομα"}.`)}
+</table>
+<p style="margin:22px 0"><a href="${SITE_URL}/paraggelia/${o.id}" style="display:inline-block;background:#1B1714;color:#F2EEE2;padding:12px 22px;font-size:14px;font-weight:600;text-decoration:none">Δες την κατάσταση της παραγγελίας</a></p>
+<p style="font-size:14px;line-height:1.6">Χρειάζεσαι κάτι; Απάντησε απλώς σε αυτό το email.<br>${esc(BUSINESS.email)}</p>`
     ),
   });
 }
@@ -185,16 +200,21 @@ export async function notifyOrderPaid(orderId: string) {
 export async function notifyOrderShipped(orderId: string) {
   const o = await loadOrder(orderId);
   if (!o) return;
+  const sid = shortId(o.id);
+  const first = o.customer_name.split(" ")[0];
+  const a = o.shipping_address || {};
   await sendEmail({
     to: o.customer_email,
     replyTo: BUSINESS.email,
-    subject: `Η παραγγελία σου στάλθηκε — #${shortId(o.id)}`,
+    subject: `Η παραγγελία σου στάλθηκε! 📦 (#${sid})`,
     html: layout(
-      "Η παραγγελία σου είναι καθ' οδόν 📦",
-      `<p style="font-size:14px;line-height:1.6">Στείλαμε την παραγγελία <b>#${shortId(o.id)}</b> με ${esc(METHOD[o.shipping_method] ?? o.shipping_method)}.</p>
-${o.tracking_number ? `<p style="font-size:14px">Αριθμός αποστολής (tracking): <b>${esc(o.tracking_number)}</b></p>` : ""}
-<p style="font-size:14px;color:#8A7A62">Αναμενόμενη παράδοση: ${DELIVERY_TIMES[o.shipping_method] ?? "σύντομα"}.</p>
-<p><a href="${SITE_URL}/paraggelia/${o.id}" style="color:#E2430F">Κατάσταση παραγγελίας</a></p>`
+      `Καλά νέα, ${esc(first)}!`,
+      `<p style="font-size:14px;line-height:1.6">Η παραγγελία σου <b>#${sid}</b> είναι έτοιμη και στάλθηκε με <b>${esc(METHOD[o.shipping_method] ?? o.shipping_method)}</b>.</p>
+${o.tracking_number ? `<div style="border:1px solid #1B1714;padding:14px;margin:16px 0;font-size:14px;line-height:1.7"><b>Αριθμός αποστολής (tracking)</b><br><span style="font-size:18px;font-weight:700;letter-spacing:.03em">${esc(o.tracking_number)}</span><br><span style="color:#8A7A62">Με αυτόν τον αριθμό παρακολουθείς το δέμα στο site της εταιρείας μεταφοράς.</span></div>` : ""}
+<p style="font-size:14px;line-height:1.6">Παράδοση σε: ${esc(a.address)}, ${esc(a.city)} ${esc(a.postcode)}<br>Αναμενόμενη παράδοση: <b>${DELIVERY_TIMES[o.shipping_method] ?? "σύντομα"}</b>.</p>
+<p style="font-size:14px;line-height:1.6;color:#8A7A62">Αν υπάρξει πρόβλημα με την παραλαβή ή το κομμάτι φτάσει με ζημιά, στείλε μας φωτογραφίες εντός 3 ημερών και θα το φτιάξουμε ξανά.</p>
+<p style="margin:22px 0"><a href="${SITE_URL}/paraggelia/${o.id}" style="display:inline-block;background:#1B1714;color:#F2EEE2;padding:12px 22px;font-size:14px;font-weight:600;text-decoration:none">Δες την κατάσταση της παραγγελίας</a></p>
+<p style="font-size:14px;line-height:1.6">Χρειάζεσαι κάτι; Απάντησε απλώς σε αυτό το email.<br>${esc(BUSINESS.email)}</p>`
     ),
   });
 }

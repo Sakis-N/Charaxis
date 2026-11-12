@@ -1,6 +1,6 @@
 // Αποστολή email μέσω Resend REST API (χωρίς npm πακέτο).
 // Αν λείπει το RESEND_API_KEY, οι αποστολές παραλείπονται σιωπηλά.
-export async function sendEmail(opts: { to: string; subject: string; html: string; replyTo?: string }) {
+export async function sendEmail(opts: { to: string; subject: string; html: string; replyTo?: string; text?: string }) {
   const key = process.env.RESEND_API_KEY;
   if (!key || !opts.to) return false;
   const from = process.env.EMAIL_FROM || "Charaxis <onboarding@resend.dev>";
@@ -13,6 +13,7 @@ export async function sendEmail(opts: { to: string; subject: string; html: strin
         to: [opts.to],
         subject: opts.subject,
         html: opts.html,
+        text: opts.text ?? htmlToText(opts.html),
         ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
       }),
     });
@@ -20,6 +21,18 @@ export async function sendEmail(opts: { to: string; subject: string; html: strin
   } catch {
     return false;
   }
+}
+
+// Απλή κειμενική εκδοχή για τα email (βοηθά κατά του spam).
+function htmlToText(html: string) {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<a [^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, "$2 ($1)")
+    .replace(/<(br|\/p|\/div|\/tr|\/h1|\/li)[^>]*>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 const ESC: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
