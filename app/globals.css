@@ -3,11 +3,37 @@
 @tailwind utilities;
 
 @layer base {
+  body {
+    min-height: 100vh;
+  }
   h1,
   h2,
   h3 {
     @apply font-display;
   }
+}
+
+/* Απαλό φόντο σαν ανοιχτή σημύδα: λεπτές νερά ξύλου + λίγοι "ρόζοι".
+   Πολύ χαμηλή αντίθεση ώστε το κείμενο να διαβάζεται άνετα. */
+.wood-bg {
+  background-color: #efe6d2;
+  background-image:
+    radial-gradient(ellipse 120px 38px at 18% 22%, rgba(150, 110, 70, 0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 150px 46px at 82% 58%, rgba(150, 110, 70, 0.09) 0%, transparent 70%),
+    radial-gradient(ellipse 100px 30px at 40% 88%, rgba(150, 110, 70, 0.08) 0%, transparent 70%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(120, 85, 50, 0.045) 0px,
+      rgba(120, 85, 50, 0.045) 1px,
+      transparent 1px,
+      transparent 7px,
+      rgba(255, 250, 235, 0.08) 7px,
+      rgba(255, 250, 235, 0.08) 9px,
+      transparent 9px,
+      transparent 23px
+    ),
+    linear-gradient(180deg, #f3ecda 0%, #ebe0c8 100%);
+  background-attachment: fixed;
 }
 
 /* Πλέγμα σαν κόντρα πλακέ σημύδα — για θέσεις χωρίς ακόμα πραγματική φωτό. */
@@ -92,7 +118,7 @@
   }
   100% {
     opacity: 1;
-    color: #1b1714;
+    color: var(--burn-final, #1b1714);
     text-shadow: none;
   }
 }

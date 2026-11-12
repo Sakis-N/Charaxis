@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type PointerEvent as RPointerEvent } from "react";
 import { supabase } from "@/lib/supabase/client";
 
 type CF = {
@@ -14,6 +14,7 @@ type CF = {
   toggle_yes?: string;
   toggle_no?: string;
 };
+type PA = { x: number; y: number; w: number; h: number; tone?: "dark" | "light" };
 type Product = {
   id?: string;
   name: string;
@@ -28,6 +29,7 @@ type Product = {
   sort_order: number;
   images: string[];
   custom_fields: CF[];
+  preview_area: PA | null;
 };
 type Category = { id: string; name: string; slug: string; description: string | null; sort_order: number; active: boolean };
 
@@ -51,7 +53,7 @@ const slugify = (s: string) =>
 
 const empty = (): Product => ({
   name: "", slug: "", category_id: null, description: "", material: "Ξύλο", dimensions: "", base_price: "",
-  is_customizable: true, active: true, sort_order: 0, images: [], custom_fields: [],
+  is_customizable: true, active: true, sort_order: 0, images: [], custom_fields: [], preview_area: null,
 });
 
 // Σμίκρυνση φωτογραφίας πριν το ανέβασμα (γρήγορο site, μικρό storage).
@@ -63,6 +65,61 @@ async function resize(file: File, max = 1600): Promise<Blob> {
   c.height = Math.round(bmp.height * scale);
   c.getContext("2d")!.drawImage(bmp, 0, 0, c.width, c.height);
   return new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("resize"))), "image/jpeg", 0.86));
+}
+
+// Σχεδίασε με το δάχτυλο/ποντίκι ένα ορθογώνιο πάνω στην κύρια φωτογραφία:
+// εκεί θα "χαράσσεται" το κείμενο του πελάτη στη ζωντανή προεπισκόπηση.
+function AreaPicker({ image, area, onChange }: { image: string; area: PA | null; onChange: (a: PA | null) => void }) {
+  const [start, setStart] = useState<{ x: number; y: number } | null>(null);
+  const pt = (e: RPointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    return {
+      x: Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100)),
+      y: Math.min(100, Math.max(0, ((e.clientY - r.top) / r.height) * 100)),
+    };
+  };
+  const upd = (a: { x: number; y: number }, b: { x: number; y: number }) =>
+    onChange({
+      x: Math.round(Math.min(a.x, b.x) * 10) / 10,
+      y: Math.round(Math.min(a.y, b.y) * 10) / 10,
+      w: Math.round(Math.abs(a.x - b.x) * 10) / 10,
+      h: Math.round(Math.abs(a.y - b.y) * 10) / 10,
+      tone: area?.tone ?? "dark",
+    });
+  return (
+    <div className="flex flex-col gap-2">
+      <div
+        className="relative w-full max-w-md cursor-crosshair touch-none select-none overflow-hidden border border-line"
+        onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); const p = pt(e); setStart(p); upd(p, p); }}
+        onPointerMove={(e) => { if (start) upd(start, pt(e)); }}
+        onPointerUp={() => setStart(null)}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={image} alt="" draggable={false} className="block h-auto w-full" />
+        {area && area.w > 0.5 && area.h > 0.5 && (
+          <div
+            className="absolute border-2 border-dashed border-ember bg-ember/15"
+            style={{ left: `${area.x}%`, top: `${area.y}%`, width: `${area.w}%`, height: `${area.h}%` }}
+          />
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-4 text-xs text-wood">
+        <span>Τράβηξε ένα ορθογώνιο εκεί που μπαίνει το κείμενο.</span>
+        <label className="flex items-center gap-1.5">
+          Χρώμα χάραξης
+          <select
+            className="border border-line bg-paper px-2 py-1"
+            value={area?.tone ?? "dark"}
+            onChange={(e) => area && onChange({ ...area, tone: e.target.value as "dark" | "light" })}
+          >
+            <option value="dark">Σκούρο (σε ξύλο)</option>
+            <option value="light">Ανοιχτό (σε μαύρο plexiglass)</option>
+          </select>
+        </label>
+        {area && <button type="button" className="text-ember-dark underline" onClick={() => onChange(null)}>Αφαίρεση</button>}
+      </div>
+    </div>
+  );
 }
 
 function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[]; onDone: () => void }) {
@@ -124,6 +181,7 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
       material: p.material.trim() || "Ξύλο", dimensions: p.dimensions.trim() || null, base_price: price,
       is_customizable: p.is_customizable, active: p.active, sort_order: Number(p.sort_order) || 0,
       images: p.images, custom_fields: p.is_customizable ? cf : [],
+      preview_area: p.is_customizable && p.preview_area && p.preview_area.w >= 3 && p.preview_area.h >= 3 ? p.preview_area : null,
     };
     setBusy(true);
     const { error } = isNew
@@ -197,6 +255,13 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
           {busy ? "Περίμενε…" : "+ Ανέβασμα φωτογραφιών"}
         </label>
       </div>
+
+      {p.is_customizable && p.images[0] && (
+        <div className="flex flex-col gap-2">
+          <b>Ζωντανή προεπισκόπηση πάνω στη φωτογραφία (προαιρετικό)</b>
+          <AreaPicker image={p.images[0]} area={p.preview_area} onChange={(a) => set("preview_area", a)} />
+        </div>
+      )}
 
       {p.is_customizable && (
         <div className="flex flex-col gap-3">
@@ -289,6 +354,7 @@ export default function ProductsAdmin() {
       base_price: r.base_price != null ? String(r.base_price) : "",
       images: (r.images as string[]) ?? [],
       custom_fields: (r.custom_fields as CF[]) ?? [],
+      preview_area: (r.preview_area as PA | null) ?? null,
     })));
     setCats((ct ?? []) as Category[]);
   }, []);
