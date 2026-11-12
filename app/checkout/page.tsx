@@ -15,6 +15,7 @@ const METHODS = [
 ] as const;
 
 const STRIPE_ENABLED = process.env.NEXT_PUBLIC_STRIPE_ENABLED === "true";
+const IRIS_ENABLED = process.env.NEXT_PUBLIC_IRIS_ENABLED === "true";
 
 const input =
   "w-full border border-line bg-paper px-4 py-3 text-sm outline-none transition-colors duration-200 focus:border-ink";
@@ -215,6 +216,15 @@ export default function CheckoutPage() {
                 <span>
                   <span className="font-medium">Κάρτα</span>
                   <span className="block text-[13px] text-wood">Ασφαλής πληρωμή μέσω Stripe</span>
+                </span>
+              </label>
+            )}
+            {IRIS_ENABLED && (
+              <label className={`flex cursor-pointer items-center gap-3 border px-4 py-3 text-sm ${payment === "iris" ? "border-ink" : "border-line hover:border-ink"}`}>
+                <input type="radio" name="pay" checked={payment === "iris"} onChange={() => setPayment("iris")} className="accent-[#1B1714]" />
+                <span>
+                  <span className="font-medium">IRIS</span>
+                  <span className="block text-[13px] text-wood">Άμεση πληρωμή από την εφαρμογή της τράπεζάς σου με QR. Θα το δεις μετά την παραγγελία.</span>
                 </span>
               </label>
             )}

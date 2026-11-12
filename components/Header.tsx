@@ -37,17 +37,17 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-paper/95">
-      <div className="flex items-center justify-between gap-4 px-5 py-4 md:px-16 md:py-5">
+      <div className="flex items-center justify-between gap-4 px-5 py-3 md:px-16 md:py-4">
         <Link
           href="/"
-          className="flex items-center gap-2.5 text-[19px] font-semibold tracking-tight transition-colors duration-200 hover:text-ember md:text-[21px]"
+          className="flex items-center gap-3 text-[20px] font-semibold tracking-tight transition-colors duration-200 hover:text-ember md:gap-4 md:text-[26px]"
         >
           <Image
             src="/brand/charaxis-logo.jpg"
             alt=""
-            width={40}
-            height={40}
-            className="h-9 w-9 rounded-full md:h-10 md:w-10"
+            width={72}
+            height={72}
+            className="h-12 w-12 rounded-full shadow-sm md:h-[60px] md:w-[60px]"
             priority
           />
           Charaxis

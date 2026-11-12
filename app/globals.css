@@ -92,7 +92,7 @@
   }
   100% {
     opacity: 1;
-    color: #1b1714;
+    color: var(--burn-final, #1b1714);
     text-shadow: none;
   }
 }

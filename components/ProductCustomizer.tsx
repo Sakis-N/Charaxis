@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
-import EngravePreview from "@/components/EngravePreview";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { useCart } from "@/lib/cart";
@@ -117,19 +116,9 @@ export default function ProductCustomizer({ productId, slug, image, productName,
   const missingPhoto = fields.find((f) => f.type === "photo" && !photos[f.id]);
   const canAdd = !blockedToggle && !uploading && !missingPhoto;
 
-  // Γραμμές για την ζωντανή προεπισκόπηση χάραξης (μόνο πεδία κειμένου).
-  const previewLines = fields
-    .filter((f) => f.type === "text" || f.type === "textarea")
-    .flatMap((f) => String(values[f.id] || "").split("\n"))
-    .filter((l) => l.trim() !== "")
-    .slice(0, 8);
-  const hasTextFields = fields.some((f) => f.type === "text" || f.type === "textarea");
-
   return (
     <div className="flex flex-col gap-8 border border-line bg-paper p-6 md:p-8">
       <h2 className="text-xl font-semibold">Προσαρμόσε το σχέδιο</h2>
-
-      {hasTextFields && <EngravePreview lines={previewLines} />}
 
       {fields.map((field, idx) => (
         <div key={field.id} className="flex flex-col gap-3">
