@@ -109,19 +109,59 @@ ${bankBlock}${totalsHtml(o)}
 
   const owner = process.env.ADMIN_NOTIFY_EMAIL;
   if (owner) {
+    const paid = o.payment_provider === "stripe";
+    const payLabel = paid
+      ? "Κάρτα — ΠΛΗΡΩΜΕΝΗ ✓"
+      : o.payment_provider === "iris"
+        ? "IRIS — αναμένεται πληρωμή"
+        : "Τραπεζική κατάθεση — αναμένεται";
+    const badge = paid ? "#2E7D32" : "#E2430F";
+    const box = "border:1px solid #DCD3BF;background:#FBF9F3;padding:16px 18px;margin:0 0 14px";
+    const lab = "font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#8A7A62;margin:0 0 6px";
+    const phone = o.customer_phone ? `<a href="tel:${esc(o.customer_phone)}" style="color:#1B1714">${esc(o.customer_phone)}</a>` : "—";
+    const items = o.order_items
+      .map((i) => {
+        const fields = (i.custom_design?.fields || [])
+          .map(
+            (x) =>
+              `<div style="margin:10px 0 0"><div style="font-size:12px;color:#8A7A62">${esc(x.label)}</div><div style="font-size:16px;line-height:1.5;white-space:pre-wrap">${esc(x.value)}</div></div>`
+          )
+          .join("");
+        const nPhotos = i.custom_design?.photos?.length ?? 0;
+        return `<div style="${box}"><div style="font-size:17px;font-weight:700">${i.quantity} × ${esc(i.product_name_snapshot)} <span style="float:right;color:#E2430F">${money(i.line_total)}</span></div>${fields}${nPhotos > 0 ? `<div style="margin-top:12px;font-size:14px;padding:8px 10px;background:#F2EEE2">📷 ${nPhotos} φωτογραφία/ες πελάτη — άνοιξέ τες από τη διαχείριση</div>` : ""}</div>`;
+      })
+      .join("");
     await sendEmail({
       to: owner,
-      subject: `🛒 Νέα παραγγελία #${sid} — ${money(o.total)}`,
-      html: layout(
-        `Νέα παραγγελία #${sid}`,
-        `<p style="font-size:14px"><b>${esc(o.customer_name)}</b> · ${esc(o.customer_email)} · ${esc(o.customer_phone)}<br>
-Πληρωμή: ${o.payment_provider === "stripe" ? "Κάρτα (πληρωμένη)" : "Κατάθεση (αναμένεται)"}<br>
-${esc(METHOD[o.shipping_method] ?? o.shipping_method)}: ${esc(a.address)}, ${esc(a.city)} ${esc(a.postcode)}</p>
-<table style="width:100%;border-collapse:collapse;font-size:14px">${itemsHtml(o, true)}</table>
-${o.notes ? `<p style="font-size:14px"><b>Σημειώσεις:</b> ${esc(o.notes)}</p>` : ""}
-<p style="font-size:14px"><b>Σύνολο: ${money(o.total)}</b></p>
-<p><a href="${SITE_URL}/admin" style="color:#E2430F">Άνοιγμα διαχείρισης</a></p>`
-      ),
+      subject: `🛒 Νέα παραγγελία #${sid} — ${money(o.total)} — ${o.customer_name}`,
+      html: `<!doctype html><html lang="el"><body style="margin:0;background:#F2EEE2;font-family:Arial,Helvetica,sans-serif;color:#1B1714">
+<div style="max-width:680px;margin:0 auto;padding:24px 16px">
+<div style="font-size:22px;font-weight:700;margin-bottom:6px">Charaxis</div>
+<h1 style="font-size:26px;margin:0 0 4px">Νέα παραγγελία #${sid}</h1>
+<div style="font-size:18px;margin:0 0 18px"><b style="color:#E2430F">${money(o.total)}</b> &nbsp;·&nbsp; <span style="color:${badge};font-weight:700">${payLabel}</span></div>
+
+<div style="${box}"><div style="${lab}">Πελάτης</div>
+<div style="font-size:17px;font-weight:700">${esc(o.customer_name)}</div>
+<div style="font-size:15px;line-height:1.7"><a href="mailto:${esc(o.customer_email)}" style="color:#1B1714">${esc(o.customer_email)}</a><br>${phone}</div></div>
+
+<div style="${box}"><div style="${lab}">Αποστολή</div>
+<div style="font-size:16px;font-weight:700">${esc(METHOD[o.shipping_method] ?? o.shipping_method)}</div>
+<div style="font-size:15px;line-height:1.6">${esc(a.address)}<br>${esc(a.city)} ${esc(a.postcode)}</div></div>
+
+<div style="${lab};margin-top:20px">Προϊόντα &amp; προσαρμογές</div>
+${items}
+
+<div style="${box}">
+<table style="width:100%;border-collapse:collapse;font-size:15px">
+<tr><td style="padding:3px 0;color:#8A7A62">Μεταφορικά</td><td style="text-align:right">${money(o.shipping_cost)}</td></tr>
+${Number(o.discount_amount) > 0 ? `<tr><td style="padding:3px 0;color:#8A7A62">Έκπτωση</td><td style="text-align:right">−${money(o.discount_amount)}</td></tr>` : ""}
+<tr><td style="padding:8px 0 0;font-size:18px;font-weight:700">Σύνολο</td><td style="padding:8px 0 0;text-align:right;font-size:18px;font-weight:700;color:#E2430F">${money(o.total)}</td></tr></table></div>
+
+${o.notes ? `<div style="${box}"><div style="${lab}">Σημειώσεις πελάτη</div><div style="font-size:15px;line-height:1.5;white-space:pre-wrap">${esc(o.notes)}</div></div>` : ""}
+
+<p style="margin:20px 0"><a href="${SITE_URL}/admin" style="display:inline-block;background:#1B1714;color:#F2EEE2;padding:14px 26px;font-size:15px;font-weight:600;text-decoration:none">Άνοιγμα διαχείρισης</a></p>
+<div style="font-size:12px;color:#8A7A62">Charaxis · Χειροποίητες laser χαράξεις σε ξύλο</div>
+</div></body></html>`,
     });
   }
   return "sent";
