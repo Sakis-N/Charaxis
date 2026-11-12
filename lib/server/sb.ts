@@ -11,7 +11,8 @@ export async function sbService(path: string, init: RequestInit = {}) {
     ...init,
     headers: {
       apikey: service,
-      Authorization: `Bearer ${service}`,
+      // Τα νέα κλειδιά (sb_secret_…) δεν είναι JWT· στέλνονται μόνο ως apikey.
+      ...(service.startsWith("eyJ") ? { Authorization: `Bearer ${service}` } : {}),
       "Content-Type": "application/json",
       ...(init.headers || {}),
     },
