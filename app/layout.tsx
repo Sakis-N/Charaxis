@@ -45,7 +45,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="el" className={`${display.variable} ${serif.variable}`}>
-      <body className="wood-bg font-display text-ink antialiased">
+      <body className="bg-paper font-display text-ink antialiased">
         <CartProvider>{children}</CartProvider>
       </body>
     </html>
