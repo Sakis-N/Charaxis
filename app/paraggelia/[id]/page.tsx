@@ -34,6 +34,21 @@ const STATUS_LABEL: Record<string, string> = {
   cancelled: "Ακυρώθηκε",
 };
 
+// Βήματα προόδου που βλέπει ο πελάτης (βγαίνουν από status + payment_status).
+function progressSteps(o: Order) {
+  const paid = o.payment_status === "paid" || ["paid", "processing", "shipped", "completed"].includes(o.status);
+  const prod = ["processing", "shipped", "completed"].includes(o.status);
+  const shipped = ["shipped", "completed"].includes(o.status);
+  const done = o.status === "completed";
+  return [
+    { label: "Η παραγγελία καταχωρήθηκε", done: true },
+    { label: o.payment_provider === "stripe" ? "Πληρωμή με κάρτα" : "Η πληρωμή εμφανίστηκε", done: paid },
+    { label: "Σε παραγωγή — χαράσσεται για σένα", done: prod },
+    { label: "Στάλθηκε", done: shipped },
+    { label: "Παραδόθηκε", done: done },
+  ];
+}
+
 export default function OrderPage({ params }: { params: { id: string } }) {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -105,6 +120,40 @@ export default function OrderPage({ params }: { params: { id: string } }) {
                 <div>Ποσό: <span className="font-medium text-ember">{Number(order.total).toFixed(2)} €</span></div>
                 <div>Αιτιολογία: <span className="font-medium">#{shortId}</span></div>
               </div>
+            )}
+
+            {order.status === "cancelled" ? (
+              <div className="border border-line p-4 text-sm text-wood">Η παραγγελία ακυρώθηκε.</div>
+            ) : (
+              <ol className="flex flex-col text-sm">
+                {(() => {
+                  const steps = progressSteps(order);
+                  const current = steps.findIndex((st) => !st.done);
+                  return steps.map((st, i) => (
+                    <li key={i} className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <span
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] ${
+                            st.done
+                              ? "border-ink bg-ink text-paper"
+                              : i === current
+                                ? "border-ember text-ember"
+                                : "border-line text-faint"
+                          }`}
+                        >
+                          {st.done ? "✓" : i + 1}
+                        </span>
+                        {i < steps.length - 1 && (
+                          <span className={`w-px grow ${st.done ? "bg-ink" : "bg-line"}`} style={{ minHeight: 18 }} />
+                        )}
+                      </div>
+                      <div className={`pb-4 pt-0.5 ${st.done ? "text-ink" : i === current ? "font-medium text-ember" : "text-faint"}`}>
+                        {st.label}
+                      </div>
+                    </li>
+                  ));
+                })()}
+              </ol>
             )}
 
             <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
