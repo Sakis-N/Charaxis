@@ -1,10 +1,18 @@
-const categories = [
+import { getActiveCategories } from "@/lib/categories";
+
+const FALLBACK = [
   { name: "Μπρελόκ", href: "/kategories/mpreloka" },
   { name: "Χαραγμένη Φωτογραφία", href: "/kategories/xaragmeni-fotografia" },
   { name: "Χριστουγεννιάτικα Στολίδια", href: "/kategories/xristougeniatika-stolidia" },
 ];
 
-export default function Categories() {
+export default async function Categories() {
+  // Μόνο οι κύριες κατηγορίες· οι υποκατηγορίες φαίνονται μέσα στη σελίδα της κάθε μίας.
+  const all = await getActiveCategories();
+  const top = all.filter((c) => !c.parent_id);
+  const categories = top.length
+    ? top.map((c) => ({ name: c.name, href: `/kategories/${c.slug}` }))
+    : FALLBACK;
   return (
     <section id="categories" className="flex flex-col gap-9 px-6 py-14 md:px-16 md:py-24">
       <h2 className="text-[26px] font-medium">Κατηγορίες</h2>

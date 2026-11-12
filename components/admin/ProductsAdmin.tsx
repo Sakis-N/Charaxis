@@ -29,7 +29,15 @@ type Product = {
   images: string[];
   custom_fields: CF[];
 };
-type Category = { id: string; name: string; slug: string; description: string | null; sort_order: number; active: boolean };
+type Category = { id: string; name: string; slug: string; description: string | null; sort_order: number; active: boolean; parent_id: string | null };
+// Εμφάνιση "Κύρια › Υπο" για επιλογές και λίστες.
+const catLabel = (cats: Category[], c: Category): string => {
+  const parent = c.parent_id ? cats.find((x) => x.id === c.parent_id) : null;
+  return parent ? `${parent.name} › ${c.name}` : c.name;
+};
+// Σειρά: κάθε κύρια ακολουθείται από τις υποκατηγορίες της.
+const catTree = (cats: Category[]): Category[] =>
+  cats.filter((c) => !c.parent_id).flatMap((c) => [c, ...cats.filter((x) => x.parent_id === c.id)]);
 
 const btn = "border border-ink px-3 py-1.5 text-sm transition-colors hover:border-ember hover:text-ember disabled:opacity-40";
 const field = "w-full border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-ink";
@@ -159,7 +167,7 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
         <label className="flex flex-col gap-1"><span className="text-wood">Κατηγορία</span>
           <select className={field} value={p.category_id ?? ""} onChange={(e) => set("category_id", e.target.value || null)}>
             <option value="">— καμία —</option>
-            {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            {catTree(cats).map((c) => <option key={c.id} value={c.id}>{c.parent_id ? "\u00a0\u00a0↳ " : ""}{catLabel(cats, c)}</option>)}
           </select></label>
         <label className="flex flex-col gap-1"><span className="text-wood">Διεύθυνση σελίδας (slug)</span>
           <input className={field} value={p.slug} onChange={(e) => set("slug", slugify(e.target.value))} /></label>
@@ -245,26 +253,55 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
 
 function Categories({ cats, reload }: { cats: Category[]; reload: () => void }) {
   const [name, setName] = useState("");
+  const [parent, setParent] = useState("");
   const [err, setErr] = useState<string | null>(null);
   async function add() {
     setErr(null);
-    const { error } = await supabase.from("categories").insert({ name: name.trim(), slug: slugify(name), sort_order: cats.length + 1 });
-    if (error) { setErr(error.message); return; }
-    setName(""); reload();
+    const { error } = await supabase.from("categories").insert({
+      name: name.trim(), slug: slugify(name), sort_order: cats.length + 1, parent_id: parent || null,
+    });
+    if (error) { setErr(error.code === "23505" ? "Υπάρχει ήδη κατηγορία με αυτό το όνομα." : error.message); return; }
+    setName(""); setParent(""); reload();
   }
+  async function setParentOf(c: Category, pid: string) {
+    setErr(null);
+    const { error } = await supabase.from("categories").update({ parent_id: pid || null }).eq("id", c.id);
+    if (error) { setErr(error.message); return; }
+    reload();
+  }
+  const tops = cats.filter((c) => !c.parent_id);
   return (
     <div className="flex flex-col gap-3 border border-line p-4 text-sm">
-      <b>Κατηγορίες</b>
-      {cats.map((c) => (
-        <div key={c.id} className="flex flex-wrap items-center justify-between gap-2">
-          <span>{c.name} <span className="text-faint">/kategories/{c.slug}</span></span>
-          <button className={btn} onClick={async () => { await supabase.from("categories").update({ active: !c.active }).eq("id", c.id); reload(); }}>
-            {c.active ? "Απόκρυψη" : "Εμφάνιση"}
-          </button>
-        </div>
-      ))}
-      <div className="flex gap-2">
-        <input className={field} placeholder="Νέα κατηγορία" value={name} onChange={(e) => setName(e.target.value)} />
+      <b>Κατηγορίες &amp; υποκατηγορίες</b>
+      {catTree(cats).map((c) => {
+        const hasChildren = cats.some((x) => x.parent_id === c.id);
+        return (
+          <div key={c.id} className={`flex flex-wrap items-center justify-between gap-2 ${c.parent_id ? "pl-6" : ""}`}>
+            <span>{c.parent_id ? "↳ " : ""}{c.name} <span className="text-faint">/kategories/{c.slug}</span></span>
+            <span className="flex flex-wrap items-center gap-2">
+              <select
+                className="border border-line bg-paper px-2 py-1.5 text-xs"
+                value={c.parent_id ?? ""}
+                disabled={hasChildren}
+                title={hasChildren ? "Έχει υποκατηγορίες, δεν μπορεί να γίνει υποκατηγορία" : "Ανήκει σε"}
+                onChange={(e) => setParentOf(c, e.target.value)}
+              >
+                <option value="">Κύρια κατηγορία</option>
+                {tops.filter((t) => t.id !== c.id).map((t) => <option key={t.id} value={t.id}>Υπό: {t.name}</option>)}
+              </select>
+              <button className={btn} onClick={async () => { await supabase.from("categories").update({ active: !c.active }).eq("id", c.id); reload(); }}>
+                {c.active ? "Απόκρυψη" : "Εμφάνιση"}
+              </button>
+            </span>
+          </div>
+        );
+      })}
+      <div className="flex flex-wrap gap-2">
+        <input className={`${field} min-w-[180px] flex-1`} placeholder="Νέα κατηγορία" value={name} onChange={(e) => setName(e.target.value)} />
+        <select className={`${field} w-auto`} value={parent} onChange={(e) => setParent(e.target.value)}>
+          <option value="">Κύρια κατηγορία</option>
+          {tops.map((t) => <option key={t.id} value={t.id}>Υποκατηγορία του: {t.name}</option>)}
+        </select>
         <button className={btn} disabled={!name.trim()} onClick={add}>Προσθήκη</button>
       </div>
       {err && <span className="text-ember-dark">{err}</span>}
@@ -307,7 +344,7 @@ export default function ProductsAdmin() {
             {p.images[0] ? <img src={p.images[0]} alt="" className="h-12 w-12 border border-line object-cover" /> : <div className="h-12 w-12 border border-line" />}
             <div className="min-w-0 flex-1">
               <div className="font-medium">{p.name}</div>
-              <div className="text-wood">{Number(p.base_price).toFixed(2)} € · {cats.find((c) => c.id === p.category_id)?.name ?? "χωρίς κατηγορία"}</div>
+              <div className="text-wood">{Number(p.base_price).toFixed(2)} € · {(() => { const c = cats.find((x) => x.id === p.category_id); return c ? catLabel(cats, c) : "χωρίς κατηγορία"; })()}</div>
             </div>
             <span className={p.active ? "text-green-700" : "text-faint"}>{p.active ? "Ενεργό" : "Ανενεργό"}</span>
             <button className={btn} onClick={async () => { await supabase.from("products").update({ active: !p.active }).eq("id", p.id); load(); }}>
