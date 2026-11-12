@@ -5,7 +5,6 @@ import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCustomizer, { type CustomField } from "@/components/ProductCustomizer";
-import type { PreviewArea } from "@/components/PhotoEngravePreview";
 import ProductGallery from "@/components/ProductGallery";
 import AddToCartButton from "@/components/AddToCartButton";
 
@@ -23,7 +22,6 @@ type Product = {
   images: string[] | null;
   is_customizable: boolean;
   custom_fields: CustomField[] | null;
-  preview_area: PreviewArea | null;
 };
 
 async function getProduct(slug: string): Promise<Product | null> {
@@ -31,7 +29,7 @@ async function getProduct(slug: string): Promise<Product | null> {
     const { data, error } = await supabase
       .from("products")
       .select(
-        "id, name, slug, description, material, dimensions, base_price, images, is_customizable, custom_fields, preview_area"
+        "id, name, slug, description, material, dimensions, base_price, images, is_customizable, custom_fields"
       )
       .eq("slug", slug)
       .eq("active", true)
@@ -124,7 +122,6 @@ export default async function ProductPage({
               productName={product.name}
               basePrice={price}
               fields={product.custom_fields || []}
-              previewArea={product.preview_area}
             />
           ) : (
             <AddToCartButton
