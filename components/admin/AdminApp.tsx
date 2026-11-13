@@ -12,7 +12,7 @@ type Order = {
   shipping_address: { address?: string; city?: string; postcode?: string; pickup_point?: string | null };
   shipping_method: string; shipping_cost: number; discount_amount: number; total: number;
   status: string; payment_provider: string; payment_status: string; notes: string | null;
-  tracking_number: string | null; admin_notes: string | null; order_items: OrderItem[];
+  tracking_number: string | null; admin_notes: string | null; photos_deleted_at?: string | null; order_items: OrderItem[];
 };
 type Quote = {
   id: string; created_at: string; customer_name: string; customer_email: string; customer_phone: string | null;
@@ -135,7 +135,10 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
                 {i.custom_design?.fields?.map((f) => (
                   <div key={f.id} className="whitespace-pre-wrap break-words text-wood"><span className="text-faint">{f.label}:</span> <span className="text-ink">{f.value}</span></div>
                 ))}
-                {(i.custom_design?.photos?.length ?? 0) > 0 && (
+                {(i.custom_design?.photos?.length ?? 0) > 0 && o.photos_deleted_at && (
+                  <div className="text-xs text-faint">📷 Οι φωτογραφίες διαγράφηκαν αυτόματα (5 ημέρες μετά την ολοκλήρωση).</div>
+                )}
+                {(i.custom_design?.photos?.length ?? 0) > 0 && !o.photos_deleted_at && (
                   <div className="flex flex-wrap gap-3">{i.custom_design!.photos!.map((p) => <Photo key={p.path} path={p.path} />)}</div>
                 )}
               </div>
