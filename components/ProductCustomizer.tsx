@@ -55,8 +55,8 @@ export default function ProductCustomizer({ productId, slug, image, productName,
       });
       return;
     }
-    if (file.size > 15 * 1024 * 1024) {
-      setUploadError("Η φωτογραφία είναι πολύ μεγάλη (μέγιστο 15MB).");
+    if (file.size > 20 * 1024 * 1024) {
+      setUploadError("Η φωτογραφία είναι πολύ μεγάλη (μέγιστο 20MB).");
       return;
     }
     const reader = new FileReader();
