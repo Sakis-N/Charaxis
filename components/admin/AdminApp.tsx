@@ -84,6 +84,16 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
     reload();
   }
 
+  async function removeOrder() {
+    if (!window.confirm("Σίγουρα θες να διαγράψεις αυτή την παραγγελία; Δεν επαναφέρεται.")) return;
+    setBusy(true);
+    setMsg(null);
+    // Τα είδη της παραγγελίας διαγράφονται αυτόματα μαζί της (cascade).
+    const { error } = await supabase.from("orders").delete().eq("id", o.id);
+    if (error) { setMsg("Σφάλμα: " + error.message); setBusy(false); return; }
+    reload();
+  }
+
   const unpaidBank = (o.payment_provider === "bank_transfer" || o.payment_provider === "iris") && o.payment_status !== "paid";
 
   return (
@@ -159,6 +169,7 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
             <div className="flex items-center gap-3">
               <button className={btn} disabled={busy} onClick={() => update({ admin_notes: notes, tracking_number: tracking.trim() || null })}>Αποθήκευση</button>
               <button className={btn} onClick={() => window.print()}>Εκτύπωση</button>
+              <button className={`${btn} text-ember-dark`} disabled={busy} onClick={removeOrder}>Διαγραφή παραγγελίας</button>
               {msg && <span className="text-wood">{msg}</span>}
             </div>
           </div>
