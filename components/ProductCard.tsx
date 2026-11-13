@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { listPrice, type Pricing } from "@/lib/pricing";
 
 export type CardProduct = {
   id: string;
@@ -7,6 +8,7 @@ export type CardProduct = {
   slug: string;
   base_price: string | null;
   images: string[] | null;
+  pricing?: Pricing | null;
 };
 
 export default function ProductCard({ p }: { p: CardProduct }) {
@@ -23,7 +25,7 @@ export default function ProductCard({ p }: { p: CardProduct }) {
         )}
       </div>
       <h3 className="text-[15px] font-medium leading-snug transition-colors duration-200 group-hover:text-ember">{p.name}</h3>
-      <div className="text-[15px] text-wood">{p.base_price ? `${Number(p.base_price).toFixed(2)} €` : ""}</div>
+      <div className="text-[15px] text-wood">{listPrice(p.base_price, p.pricing)}</div>
     </Link>
   );
 }

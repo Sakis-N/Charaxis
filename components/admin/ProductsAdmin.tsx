@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { minPrice, type Pricing } from "@/lib/pricing";
 
 type CF = {
   id: string;
-  type: "text" | "textarea" | "photo" | "select" | "toggle_text";
+  type: "text" | "textarea" | "photo" | "select" | "toggle_text" | "side";
   label: string;
   description?: string;
   placeholder?: string;
@@ -28,7 +29,10 @@ type Product = {
   sort_order: number;
   images: string[];
   custom_fields: CF[];
+  pricing: Pricing | null;
 };
+// Η κλιμακωτή τιμολόγηση όπως επεξεργάζεται στη φόρμα (κείμενα, για να γράφονται ελεύθερα τα δεκαδικά).
+type PricingEd = { min_qty: string[]; variants: Record<string, { label: string; prices: string[] }> };
 type Category = { id: string; name: string; slug: string; description: string | null; sort_order: number; active: boolean };
 
 const btn = "border border-ink px-3 py-1.5 text-sm transition-colors hover:border-ember hover:text-ember disabled:opacity-40";
@@ -39,6 +43,7 @@ const TYPES: Record<CF["type"], string> = {
   photo: "Φωτογραφία πελάτη",
   select: "Επιλογή (κουμπιά)",
   toggle_text: "Ναι/Όχι + κείμενο",
+  side: "Όψη (λογότυπο ή γράμματα)",
 };
 
 const GR: Record<string, string> = {
@@ -51,7 +56,7 @@ const slugify = (s: string) =>
 
 const empty = (): Product => ({
   name: "", slug: "", category_id: null, description: "", material: "Ξύλο", dimensions: "", base_price: "",
-  is_customizable: true, active: true, sort_order: 0, images: [], custom_fields: [],
+  is_customizable: true, active: true, sort_order: 0, images: [], custom_fields: [], pricing: null,
 });
 
 // Σμίκρυνση φωτογραφίας πριν το ανέβασμα (γρήγορο site, μικρό storage).
@@ -69,6 +74,16 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
   const [p, setP] = useState<Product>(initial);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pr, setPr] = useState<PricingEd | null>(
+    initial.pricing
+      ? {
+          min_qty: initial.pricing.min_qty.map(String),
+          variants: Object.fromEntries(
+            Object.entries(initial.pricing.variants).map(([k, v]) => [k, { label: v.label, prices: v.prices.map(String) }])
+          ),
+        }
+      : null
+  );
   const isNew = !initial.id;
   const set = <K extends keyof Product>(k: K, v: Product[K]) => setP((x) => ({ ...x, [k]: v }));
 
@@ -108,6 +123,25 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
     const price = Number(p.base_price.replace(",", "."));
     if (!isFinite(price) || price < 0 || p.base_price.trim() === "") { setMsg("Βάλε έγκυρη τιμή."); return; }
     const slug = p.slug.trim() || slugify(p.name);
+    let pricing: Pricing | null = null;
+    if (pr) {
+      const mins = pr.min_qty.map((m) => Number(m));
+      if (mins.some((m) => !Number.isInteger(m) || m < 1) || mins[0] !== 1 || mins.some((m, i) => i > 0 && m <= mins[i - 1])) {
+        setMsg("Κλιμάκια τιμών: η πρώτη ποσότητα πρέπει να είναι 1 και οι επόμενες αυξανόμενες ακέραιες.");
+        return;
+      }
+      const variants: Pricing["variants"] = {};
+      for (const [k, v] of Object.entries(pr.variants)) {
+        const prices = v.prices.map((x) => Number(String(x).replace(",", ".")));
+        if (prices.length !== mins.length || v.prices.some((x) => String(x).trim() === "") || prices.some((x) => !isFinite(x) || x < 0)) {
+          setMsg(`Συμπλήρωσε όλες τις τιμές για «${v.label}».`);
+          return;
+        }
+        variants[k] = { label: v.label, prices };
+      }
+      pricing = { min_qty: mins, variants };
+      pricing.min_price = minPrice(pricing);
+    }
     // Μοναδικά ids πεδίων (από την ετικέτα).
     const used = new Set<string>();
     const cf = p.custom_fields.map((f, i) => {
@@ -123,7 +157,7 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
       name: p.name.trim(), slug, category_id: p.category_id || null, description: p.description.trim() || null,
       material: p.material.trim() || "Ξύλο", dimensions: p.dimensions.trim() || null, base_price: price,
       is_customizable: p.is_customizable, active: p.active, sort_order: Number(p.sort_order) || 0,
-      images: p.images, custom_fields: p.is_customizable ? cf : [],
+      images: p.images, custom_fields: p.is_customizable ? cf : [], pricing,
     };
     setBusy(true);
     const { error } = isNew
@@ -197,6 +231,58 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
           {busy ? "Περίμενε…" : "+ Ανέβασμα φωτογραφιών"}
         </label>
       </div>
+
+      {pr && (
+        <div className="flex flex-col gap-3">
+          <b>Κλιμακωτή τιμολόγηση (τιμή ανά τεμάχιο)</b>
+          <p className="text-wood">
+            Η πάνω γραμμή είναι η ελάχιστη ποσότητα κάθε κλιμακίου (η πρώτη πάντα 1). Ισχύει το κλιμάκιο με τη μεγαλύτερη
+            ελάχιστη ποσότητα που δεν ξεπερνά την παραγγελία. Το πεδίο «Τιμή» πιο πάνω δεν χρησιμοποιείται στο checkout.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="border-separate border-spacing-1 text-sm">
+              <thead>
+                <tr>
+                  <th className="pr-3 text-left font-normal text-wood">Από (τεμ.)</th>
+                  {pr.min_qty.map((m, i) => (
+                    <th key={i}>
+                      <input className={`${field} w-20`} inputMode="numeric" value={m}
+                        onChange={(e) => setPr({ ...pr, min_qty: pr.min_qty.map((x, k) => (k === i ? e.target.value : x)) })} />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(pr.variants).map(([k, v]) => (
+                  <tr key={k}>
+                    <td className="pr-3">{v.label}</td>
+                    {v.prices.map((x, i) => (
+                      <td key={i}>
+                        <input className={`${field} w-20`} inputMode="decimal" value={x}
+                          onChange={(e) =>
+                            setPr({ ...pr, variants: { ...pr.variants, [k]: { ...v, prices: v.prices.map((y, j) => (j === i ? e.target.value : y)) } } })
+                          } />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex gap-2">
+            <button className={btn} onClick={() => setPr({
+              min_qty: [...pr.min_qty, ""],
+              variants: Object.fromEntries(Object.entries(pr.variants).map(([k, v]) => [k, { ...v, prices: [...v.prices, ""] }])),
+            })}>+ Κλιμάκιο</button>
+            {pr.min_qty.length > 1 && (
+              <button className={btn} onClick={() => setPr({
+                min_qty: pr.min_qty.slice(0, -1),
+                variants: Object.fromEntries(Object.entries(pr.variants).map(([k, v]) => [k, { ...v, prices: v.prices.slice(0, -1) }])),
+              })}>− Τελευταίο κλιμάκιο</button>
+            )}
+          </div>
+        </div>
+      )}
 
       {p.is_customizable && (
         <div className="flex flex-col gap-3">
@@ -289,6 +375,7 @@ export default function ProductsAdmin() {
       base_price: r.base_price != null ? String(r.base_price) : "",
       images: (r.images as string[]) ?? [],
       custom_fields: (r.custom_fields as CF[]) ?? [],
+      pricing: (r.pricing as Pricing | null) ?? null,
     })));
     setCats((ct ?? []) as Category[]);
   }, []);

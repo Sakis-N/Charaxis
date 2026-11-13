@@ -22,7 +22,7 @@ async function getData(slug: string) {
     if (!cat) return null;
     const { data: products } = await supabase
       .from("products")
-      .select("id, name, slug, base_price, images")
+      .select("id, name, slug, base_price, images, pricing")
       .eq("active", true)
       .eq("category_id", (cat as Category).id)
       .order("sort_order", { ascending: true })

@@ -44,12 +44,26 @@ export default function CartPage() {
                       </div>
                     ))}
                     {it.custom_design && it.custom_design.photos.length > 0 && (
-                      <div className="text-[13px] text-wood">📷 Φωτογραφία ανεβασμένη</div>
+                      <div className="text-[13px] text-wood">
+                        📷 {it.custom_design.photos.length > 1 ? "Αρχεία ανεβασμένα" : "Αρχείο ανεβασμένο"}
+                      </div>
+                    )}
+                    {it.tiers && (
+                      <div className="text-[13px] text-wood">{it.price.toFixed(2)} € ανά τεμάχιο</div>
                     )}
                     <div className="mt-auto flex items-center gap-4 pt-2 text-sm">
                       <div className="flex items-center border border-line">
                         <button type="button" aria-label="Μείωση" onClick={() => setQty(it.key, it.quantity - 1)} className="px-3 py-1.5 hover:text-ember">−</button>
-                        <span className="min-w-6 text-center">{it.quantity}</span>
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min={1}
+                          max={5000}
+                          aria-label="Ποσότητα"
+                          value={it.quantity}
+                          onChange={(e) => setQty(it.key, Number(e.target.value))}
+                          className="w-14 bg-transparent py-1.5 text-center outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        />
                         <button type="button" aria-label="Αύξηση" onClick={() => setQty(it.key, it.quantity + 1)} className="px-3 py-1.5 hover:text-ember">+</button>
                       </div>
                       <button type="button" onClick={() => remove(it.key)} className="text-wood underline underline-offset-2 hover:text-ember">

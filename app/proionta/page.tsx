@@ -3,6 +3,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { listPrice, type Pricing } from "@/lib/pricing";
 
 // Οι αλλαγές από το admin εμφανίζονται στο site μέσα σε ~1 λεπτό, χωρίς νέο deploy.
 export const revalidate = 60;
@@ -14,13 +15,14 @@ type Product = {
   material: string | null;
   base_price: string | null;
   images: string[] | null;
+  pricing: Pricing | null;
 };
 
 async function getProducts(): Promise<Product[]> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select("id, name, slug, material, base_price, images")
+      .select("id, name, slug, material, base_price, images, pricing")
       .eq("active", true)
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false });
@@ -74,7 +76,7 @@ export default async function ProductsPage() {
                     {p.name}
                   </h3>
                   <div className="text-[15px] text-wood">
-                    {p.base_price ? `${Number(p.base_price).toFixed(2)} €` : ""}
+                    {listPrice(p.base_price, p.pricing)}
                   </div>
                 </Link>
               );

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
+import { listPrice, type Pricing } from "@/lib/pricing";
 
 type Product = {
   id: string;
@@ -9,13 +10,14 @@ type Product = {
   material: string | null;
   base_price: string | null;
   images: string[] | null;
+  pricing: Pricing | null;
 };
 
 async function getFeaturedProducts(): Promise<Product[]> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select("id, name, slug, material, base_price, images")
+      .select("id, name, slug, material, base_price, images, pricing")
       .eq("active", true)
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false })
@@ -65,7 +67,7 @@ export default async function FeaturedProducts() {
                 {p.name}
               </h3>
               <div className="text-[15px] text-wood">
-                {p.base_price ? `${Number(p.base_price).toFixed(2)} €` : ""}
+                {listPrice(p.base_price, p.pricing)}
               </div>
             </Link>
           );

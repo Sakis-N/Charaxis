@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { tierPrice, type Tiers } from "@/lib/pricing";
 
 export type CartItem = {
   key: string;
@@ -10,10 +11,13 @@ export type CartItem = {
   image: string | null;
   price: number; // ενδεικτική τιμή· η τελική υπολογίζεται στον server
   quantity: number;
+  // Κλιμάκια τιμής ανά ποσότητα (μόνο για προϊόντα με κλιμακωτή τιμολόγηση).
+  tiers?: Tiers | null;
   // Οι επιλογές του πελάτη (κείμενα, επιλογές, διαδρομές φωτογραφιών).
   custom_design: {
     fields: { id: string; label: string; value: string }[];
     photos: { field: string; path: string }[];
+    variant?: string | null; // κλειδί τιμολόγησης (π.χ. "logo_text")· η τιμή τελικά υπολογίζεται στη βάση
   } | null;
 };
 
@@ -55,8 +59,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => [...prev, { ...item, key }]);
   }, []);
   const setQty = useCallback((key: string, qty: number) => {
-    const q = Math.max(1, Math.min(20, Math.floor(qty) || 1));
-    setItems((prev) => prev.map((i) => (i.key === key ? { ...i, quantity: q } : i)));
+    const q = Math.max(1, Math.min(5000, Math.floor(qty) || 1));
+    setItems((prev) =>
+      prev.map((i) => (i.key === key ? { ...i, quantity: q, price: i.tiers ? tierPrice(i.tiers, q) : i.price } : i))
+    );
   }, []);
   const remove = useCallback((key: string) => setItems((prev) => prev.filter((i) => i.key !== key)), []);
   const clear = useCallback(() => setItems([]), []);

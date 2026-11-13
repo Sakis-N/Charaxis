@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import ProductCustomizer, { type CustomField } from "@/components/ProductCustomizer";
 import ProductGallery from "@/components/ProductGallery";
 import AddToCartButton from "@/components/AddToCartButton";
+import { minPrice, type Pricing } from "@/lib/pricing";
 
 // Οι αλλαγές από το admin εμφανίζονται στο site μέσα σε ~1 λεπτό, χωρίς νέο deploy.
 export const revalidate = 60;
@@ -22,6 +23,7 @@ type Product = {
   images: string[] | null;
   is_customizable: boolean;
   custom_fields: CustomField[] | null;
+  pricing: Pricing | null;
 };
 
 async function getProduct(slug: string): Promise<Product | null> {
@@ -29,7 +31,7 @@ async function getProduct(slug: string): Promise<Product | null> {
     const { data, error } = await supabase
       .from("products")
       .select(
-        "id, name, slug, description, material, dimensions, base_price, images, is_customizable, custom_fields"
+        "id, name, slug, description, material, dimensions, base_price, images, is_customizable, custom_fields, pricing"
       )
       .eq("slug", slug)
       .eq("active", true)
@@ -63,7 +65,8 @@ export default async function ProductPage({
   if (!product) notFound();
 
   const images = product.images || [];
-  const price = product.base_price ? Number(product.base_price) : null;
+  const pricing = product.pricing;
+  const price = pricing ? minPrice(pricing) : product.base_price ? Number(product.base_price) : null;
 
   return (
     <main className="flex flex-col overflow-x-hidden">
@@ -106,7 +109,7 @@ export default async function ProductPage({
             {product.name}
           </h1>
           <div className="text-2xl font-medium text-ember">
-            {price ? `${price.toFixed(2)} €` : ""}
+            {price ? `${pricing ? "από " : ""}${price.toFixed(2)} €${pricing ? " / τεμ." : ""}` : ""}
           </div>
           {product.description && (
             <p className="max-w-md font-serif text-[15px] leading-relaxed text-wood">
@@ -122,6 +125,7 @@ export default async function ProductPage({
               productName={product.name}
               basePrice={price}
               fields={product.custom_fields || []}
+              pricing={pricing}
             />
           ) : (
             <AddToCartButton
