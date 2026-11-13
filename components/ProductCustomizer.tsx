@@ -8,7 +8,7 @@ import { flyToCart } from "@/components/flyToCart";
 
 export type CustomField = {
   id: string;
-  type: "text" | "textarea" | "photo" | "select" | "toggle_text";
+  type: "text" | "textarea" | "photo" | "logo" | "select" | "toggle_text";
   label: string;
   description?: string;
   placeholder?: string;
@@ -25,6 +25,14 @@ type Props = {
   productName: string;
   basePrice: number | null;
   fields: CustomField[];
+};
+
+// Τύποι για αρχεία που ο browser συχνά δεν αναγνωρίζει (π.χ. .ai, .eps).
+const MIME: Record<string, string> = {
+  svg: "image/svg+xml",
+  pdf: "application/pdf",
+  eps: "application/postscript",
+  ai: "application/illustrator",
 };
 
 type Values = Record<string, string | boolean>;
@@ -59,9 +67,11 @@ export default function ProductCustomizer({ productId, slug, image, productName,
       setUploadError("Η φωτογραφία είναι πολύ μεγάλη (μέγιστο 20MB).");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setPhotoPreview(reader.result as string);
-    reader.readAsDataURL(file);
+    if (fields.find((f) => f.id === id)?.type === "photo") {
+      const reader = new FileReader();
+      reader.onload = () => setPhotoPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
     setValue(id, file.name);
 
     // Ανέβασμα αμέσως στον ιδιωτικό χώρο αποθήκευσης — ο πελάτης δεν χρειάζεται
@@ -71,7 +81,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
     const path = `${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage
       .from("customer-uploads")
-      .upload(path, file, { contentType: file.type || undefined, upsert: false });
+      .upload(path, file, { contentType: MIME[ext] || file.type || undefined, upsert: false });
     setUploading(false);
     if (error) {
       setUploadError("Δεν ανέβηκε η φωτογραφία. Δοκίμασε ξανά.");
@@ -84,7 +94,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
 
   function addToCart(btn: HTMLElement) {
     const outFields = fields
-      .filter((f) => f.type !== "photo")
+      .filter((f) => f.type !== "photo" && f.type !== "logo")
       .map((f) => {
         let v = values[f.id];
         if (f.type === "toggle_text") {
@@ -113,7 +123,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
   const blockedToggle = fields.find(
     (f) => f.type === "toggle_text" && values[f.id] === true && !String(values[`${f.id}_value`] || "").trim()
   );
-  const missingPhoto = fields.find((f) => f.type === "photo" && !photos[f.id]);
+  const missingPhoto = fields.find((f) => (f.type === "photo" || f.type === "logo") && !photos[f.id]);
   const canAdd = !blockedToggle && !uploading && !missingPhoto;
 
   return (
@@ -189,6 +199,26 @@ export default function ProductCustomizer({ productId, slug, image, productName,
                     <img src={photoPreview} alt="Προεπισκόπηση" className="h-full w-full object-cover" />
                   </div>
                 )}
+              </>
+            )}
+
+            {field.type === "logo" && (
+              <>
+                <label className="flex w-fit cursor-pointer items-center gap-3 border border-line px-5 py-2.5 text-sm transition-colors duration-200 hover:border-ink">
+                  <input
+                    type="file"
+                    accept=".svg,.pdf,.eps,.ai,.png,.jpg,.jpeg,.webp,image/*"
+                    onChange={(e) => handlePhoto(field.id, e)}
+                    className="hidden"
+                  />
+                  {values[field.id] ? "Αλλαγή αρχείου" : "Ανέβασε το λογότυπο"}
+                </label>
+                {values[field.id] && photos[field.id] && (
+                  <p className="mt-2 text-xs text-wood">✓ {String(values[field.id])}</p>
+                )}
+                <p className="mt-2 max-w-md text-xs leading-relaxed text-faint">
+                  Καλύτερο αποτέλεσμα με διανυσματικό αρχείο (SVG ή PDF). Αλλιώς, PNG ή JPG υψηλής ανάλυσης, ιδανικά με διαφανές φόντο. Μέγιστο 20MB.
+                </p>
               </>
             )}
 

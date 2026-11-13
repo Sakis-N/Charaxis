@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase/client";
 
 type CF = {
   id: string;
-  type: "text" | "textarea" | "photo" | "select" | "toggle_text";
+  type: "text" | "textarea" | "photo" | "logo" | "select" | "toggle_text";
   label: string;
   description?: string;
   placeholder?: string;
@@ -45,6 +45,7 @@ const TYPES: Record<CF["type"], string> = {
   text: "Μικρό κείμενο",
   textarea: "Μεγάλο κείμενο",
   photo: "Φωτογραφία πελάτη",
+  logo: "Λογότυπο / αρχείο σχεδίου (SVG, PDF, PNG…)",
   select: "Επιλογή (κουμπιά)",
   toggle_text: "Ναι/Όχι + κείμενο",
 };

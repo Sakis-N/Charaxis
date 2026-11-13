@@ -1,8 +1,8 @@
-// Καθημερινά: σβήνει τις φωτογραφίες πελατών 5 μέρες μετά την ολοκλήρωση της παραγγελίας.
+// Καθημερινά: σβήνει τις φωτογραφίες πελατών 7 μέρες μετά την ολοκλήρωση της παραγγελίας.
 // Τρέχει μόνο στο production deploy (scheduled function). Χρησιμοποιεί μόνο μεταβλητές που ήδη υπάρχουν.
 export const config = { schedule: "0 1 * * *" };
 
-const DAYS = 5;
+const DAYS = 7;
 
 export default async function handler() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

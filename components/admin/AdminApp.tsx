@@ -45,14 +45,29 @@ async function callNotify(orderId: string, kind: "paid" | "shipped") {
   return r.ok;
 }
 
+const FILE_EXT = ["svg", "pdf", "eps", "ai"];
 function Photo({ path }: { path: string }) {
   const [url, setUrl] = useState<string | null>(null);
   const [dl, setDl] = useState<string | null>(null);
+  const ext = (path.split(".").pop() || "").toLowerCase();
+  const isFile = FILE_EXT.includes(ext);
   useEffect(() => {
     supabase.storage.from("customer-uploads").createSignedUrl(path, 3600).then(({ data }) => setUrl(data?.signedUrl ?? null));
     supabase.storage.from("customer-uploads").createSignedUrl(path, 3600, { download: true }).then(({ data }) => setDl(data?.signedUrl ?? null));
   }, [path]);
   if (!url) return <div className="h-24 w-24 border border-line" />;
+  if (isFile) {
+    return (
+      <div className="flex flex-col gap-1 border border-line px-3 py-2">
+        <span className="text-xs text-faint">Αρχείο λογότυπου / σχεδίου</span>
+        <span className="font-medium uppercase">{ext}</span>
+        <div className="flex gap-3 text-xs">
+          <a href={url} target="_blank" rel="noreferrer" className="underline hover:text-ember">Άνοιγμα</a>
+          {dl && <a href={dl} className="underline hover:text-ember">Λήψη</a>}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-1">
       <a href={url} target="_blank" rel="noreferrer">
@@ -136,7 +151,7 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
                   <div key={f.id} className="whitespace-pre-wrap break-words text-wood"><span className="text-faint">{f.label}:</span> <span className="text-ink">{f.value}</span></div>
                 ))}
                 {(i.custom_design?.photos?.length ?? 0) > 0 && o.photos_deleted_at && (
-                  <div className="text-xs text-faint">📷 Οι φωτογραφίες διαγράφηκαν αυτόματα (5 ημέρες μετά την ολοκλήρωση).</div>
+                  <div className="text-xs text-faint">📷 Οι φωτογραφίες διαγράφηκαν αυτόματα (7 ημέρες μετά την ολοκλήρωση).</div>
                 )}
                 {(i.custom_design?.photos?.length ?? 0) > 0 && !o.photos_deleted_at && (
                   <div className="flex flex-wrap gap-3">{i.custom_design!.photos!.map((p) => <Photo key={p.path} path={p.path} />)}</div>
