@@ -84,6 +84,15 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
     reload();
   }
 
+  const [confirmDel, setConfirmDel] = useState(false);
+  async function remove() {
+    setBusy(true);
+    setMsg(null);
+    const { error } = await supabase.from("orders").delete().eq("id", o.id);
+    if (error) { setMsg("Σφάλμα διαγραφής: " + error.message); setBusy(false); setConfirmDel(false); return; }
+    reload();
+  }
+
   const unpaidBank = (o.payment_provider === "bank_transfer" || o.payment_provider === "iris") && o.payment_status !== "paid";
 
   return (
@@ -159,6 +168,18 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
             <div className="flex items-center gap-3">
               <button className={btn} disabled={busy} onClick={() => update({ admin_notes: notes, tracking_number: tracking.trim() || null })}>Αποθήκευση</button>
               <button className={btn} onClick={() => window.print()}>Εκτύπωση</button>
+              {!confirmDel ? (
+                <button className={`${btn} ml-auto text-ember-dark`} disabled={busy} onClick={() => setConfirmDel(true)}>Διαγραφή παραγγελίας</button>
+              ) : (
+                <span className="ml-auto flex flex-wrap items-center gap-2 border border-ember-dark px-3 py-1.5 text-xs">
+                  <span className="text-ember-dark">
+                    Οριστική διαγραφή της #{o.id.slice(0, 8).toUpperCase()}; Δεν επαναφέρεται.
+                    {o.payment_status === "paid" && " Είναι πληρωμένη — κράτα την αν είναι πραγματική πώληση (λογιστικά)."}
+                  </span>
+                  <button className="border border-ember-dark bg-ember-dark px-3 py-1 text-paper" disabled={busy} onClick={remove}>Ναι, διαγραφή</button>
+                  <button className="px-2 py-1 underline" onClick={() => setConfirmDel(false)}>Άκυρο</button>
+                </span>
+              )}
               {msg && <span className="text-wood">{msg}</span>}
             </div>
           </div>
