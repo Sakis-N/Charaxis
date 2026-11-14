@@ -9,7 +9,7 @@ import { SIDE_CHOICES, rangeLabel, tierPrice, tiersFor, variantKey, type Pricing
 
 export type CustomField = {
   id: string;
-  type: "text" | "textarea" | "photo" | "select" | "toggle_text" | "side";
+  type: "text" | "textarea" | "photo" | "select" | "toggle_text" | "side" | "addon";
   label: string;
   description?: string;
   placeholder?: string;
@@ -17,6 +17,8 @@ export type CustomField = {
   options?: string[]; // για type: "select"
   toggle_yes?: string; // για type: "toggle_text"
   toggle_no?: string;
+  // για type: "addon" — επιλογές με δική τους τιμή (από το pricing.variants[key]) και προαιρετικό κείμενο/φωτογραφία
+  choices?: { key: string; label: string; input: "none" | "text" | "photo"; placeholder?: string }[];
 };
 
 type Props = {
@@ -105,7 +107,11 @@ export default function ProductCustomizer({ productId, slug, image, productName,
   const sides = fields.filter((f) => f.type === "side");
   const choiceOf = (f: CustomField) => (values[f.id] as string) || "none";
   const textOf = (f: CustomField) => String(values[`${f.id}_value`] || "").trim();
-  const variant = sides.length ? variantKey(sides.map(choiceOf)) : null;
+  const addon = fields.find((f) => f.type === "addon") ?? null;
+  const addonChoice = addon
+    ? (addon.choices || []).find((c) => c.key === ((values[addon.id] as string) || addon.choices?.[0]?.key)) ?? null
+    : null;
+  const variant = sides.length ? variantKey(sides.map(choiceOf)) : addonChoice ? addonChoice.key : null;
   const tiers = pricing && variant ? tiersFor(pricing, variant) : null;
   const qtyNum = Math.min(5000, Math.max(1, parseInt(qtyText, 10) || 1));
   const unit = tiers ? tierPrice(tiers, qtyNum) : pricing ? null : basePrice;
@@ -122,6 +128,19 @@ export default function ProductCustomizer({ productId, slug, image, productName,
     }
   }
 
+  if (!sideProblem && addon && addonChoice) {
+    if (addonChoice.input === "photo" && !photos[addon.id]) sideProblem = `Ανέβασε τη φωτογραφία για «${addon.label}».`;
+    else if (addonChoice.input === "text" && !String(values[`${addon.id}_value`] || "").trim())
+      sideProblem = `Γράψε το κείμενο για «${addon.label}».`;
+  }
+  // Επιπλέον κόστος μιας επιλογής σε σχέση με την πρώτη (π.χ. «Φωτογραφία» +5 €).
+  function addonExtra(key: string): number {
+    const base = addon?.choices?.[0]?.key;
+    const a = pricing && base ? tiersFor(pricing, key) : null;
+    const b = pricing && base ? tiersFor(pricing, base) : null;
+    return a && b ? tierPrice(a, qtyNum) - tierPrice(b, qtyNum) : 0;
+  }
+
   function addToCart(btn: HTMLElement) {
     const outFields = fields
       .filter((f) => f.type !== "photo")
@@ -129,6 +148,9 @@ export default function ProductCustomizer({ productId, slug, image, productName,
         let v = values[f.id];
         if (f.type === "toggle_text") {
           v = v === true ? `${f.toggle_yes || "Ναι"}: ${String(values[`${f.id}_value`] || "")}` : v === false ? f.toggle_no || "Όχι" : "";
+        } else if (f.type === "addon") {
+          const c = addonChoice;
+          v = !c || c.input === "none" ? c?.label || "" : c.input === "photo" ? `${c.label} (ανεβασμένο αρχείο)` : `${c.label}: ${String(values[`${f.id}_value`] || "").trim()}`;
         } else if (f.type === "side") {
           const c = choiceOf(f);
           v = c === "logo" ? "Λογότυπο (ανεβασμένο αρχείο)" : c === "text" ? `Γράμματα: ${textOf(f)}` : "Χωρίς χάραξη";
@@ -280,6 +302,58 @@ export default function ProductCustomizer({ productId, slug, image, productName,
               </>
             )}
 
+            {field.type === "addon" && (
+              <>
+                <div className="flex flex-wrap gap-3">
+                  {(field.choices || []).map((c, ci) => {
+                    const extra = addonExtra(c.key);
+                    return (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => {
+                          setValue(field.id, c.key);
+                          if (c.input !== "photo") clearFile(field.id);
+                          if (c.input !== "text") setValue(`${field.id}_value`, "");
+                        }}
+                        className={choiceBtn((addonChoice?.key ?? field.choices?.[0]?.key) === c.key)}
+                      >
+                        {c.label}
+                        {ci > 0 && extra > 0 ? ` (+${extra.toFixed(2)} €)` : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+                {addonChoice?.input === "photo" && (
+                  <div className="mt-3">
+                    <label className="flex w-fit cursor-pointer items-center gap-3 border border-line px-5 py-2.5 text-sm transition-colors duration-200 hover:border-ink">
+                      <input type="file" accept="image/*" onChange={(e) => handlePhoto(field.id, e)} className="hidden" />
+                      {fileNames[field.id] ? "Αλλαγή φωτογραφίας" : "Ανέβασε φωτογραφία"}
+                    </label>
+                    {previews[field.id] && (
+                      <div className="relative mt-3 h-28 w-28 overflow-hidden border border-line">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={previews[field.id] as string} alt="Προεπισκόπηση" className="h-full w-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {addonChoice?.input === "text" && (
+                  <div className="mt-3">
+                    <input
+                      type="text"
+                      value={(values[`${field.id}_value`] as string) || ""}
+                      onChange={(e) => setValue(`${field.id}_value`, e.target.value)}
+                      placeholder={addonChoice.placeholder || "π.χ. 2026"}
+                      maxLength={60}
+                      className={inputCls}
+                    />
+                    <p className="mt-1.5 text-xs text-faint">Γράψε ακριβώς το κείμενο που θες χαραγμένο.</p>
+                  </div>
+                )}
+              </>
+            )}
+
             {field.type === "side" && (
               <>
                 <div className="flex flex-wrap gap-3">
@@ -363,7 +437,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
               onBlur={() => setQtyText(String(qtyNum))}
               className="w-32 border border-line bg-paper px-4 py-3 text-sm outline-none transition-colors duration-200 focus:border-ink"
             />
-            {tiers ? (
+            {tiers && tiers.length > 1 ? (
               <ul className="mt-4 grid max-w-md grid-cols-2 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-3">
                 {tiers.map(([min, pr], i) => {
                   const next = tiers[i + 1]?.[0];
@@ -375,7 +449,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
                   );
                 })}
               </ul>
-            ) : (
+            ) : tiers ? null : (
               <p className="mt-2 text-xs text-faint">Διάλεξε τι θα χαραχτεί για να δεις τις τιμές ανά ποσότητα.</p>
             )}
           </div>

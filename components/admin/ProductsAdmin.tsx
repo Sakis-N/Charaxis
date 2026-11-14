@@ -6,7 +6,7 @@ import { minPrice, type Pricing } from "@/lib/pricing";
 
 type CF = {
   id: string;
-  type: "text" | "textarea" | "photo" | "select" | "toggle_text" | "side";
+  type: "text" | "textarea" | "photo" | "select" | "toggle_text" | "side" | "addon";
   label: string;
   description?: string;
   placeholder?: string;
@@ -44,6 +44,7 @@ const TYPES: Record<CF["type"], string> = {
   select: "Επιλογή (κουμπιά)",
   toggle_text: "Ναι/Όχι + κείμενο",
   side: "Όψη (λογότυπο ή γράμματα)",
+  addon: "Επιλογή με τιμή (προχωρημένο)",
 };
 
 const GR: Record<string, string> = {
