@@ -11,6 +11,7 @@ type Item = {
 };
 type Order = {
   id: string;
+  production_time?: string | null;
   customer_name: string;
   customer_email: string;
   customer_phone: string | null;
