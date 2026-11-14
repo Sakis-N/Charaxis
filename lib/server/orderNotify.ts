@@ -167,6 +167,26 @@ ${o.notes ? `<div style="${box}"><div style="${lab}">Σημειώσεις πελ
   return "sent";
 }
 
+// Ο χρόνος παραγωγής που όρισες στο admin· αλλιώς ο προεπιλεγμένος του site.
+function prodTime(o: Order) {
+  return o.production_time && o.production_time.trim() !== "" ? o.production_time.trim() : PRODUCTION_TIME;
+}
+
+export async function notifyOrderStarted(orderId: string) {
+  const o = await loadOrder(orderId);
+  if (!o) return;
+  await sendEmail({
+    to: o.customer_email,
+    replyTo: BUSINESS.email,
+    subject: `Ξεκινάμε την παραγγελία σου — #${shortId(o.id)}`,
+    html: layout(
+      "Ξεκινάμε την παραγωγή ✓",
+      `<p style="font-size:14px;line-height:1.6">Είδαμε την παραγγελία σου <b>#${shortId(o.id)}</b> και ξεκινάμε την παραγωγή. Εκτιμώμενος χρόνος παραγωγής: <b>${esc(prodTime(o))}</b>. Μόλις είναι έτοιμη, θα την αποστείλουμε και θα σου στείλουμε νέο email.</p>
+<p><a href="${SITE_URL}/paraggelia/${o.id}" style="color:#E2430F">Κατάσταση παραγγελίας</a></p>`
+    ),
+  });
+}
+
 export async function notifyOrderPaid(orderId: string) {
   const o = await loadOrder(orderId);
   if (!o || o.payment_provider === "stripe") return; // η κάρτα καλύπτεται από το notifyOrderCreated
@@ -176,7 +196,7 @@ export async function notifyOrderPaid(orderId: string) {
     subject: `Λάβαμε την πληρωμή σου — #${shortId(o.id)}`,
     html: layout(
       "Η κατάθεση εμφανίστηκε ✓",
-      `<p style="font-size:14px;line-height:1.6">Ευχαριστούμε! Ξεκινάμε την παραγωγή της παραγγελίας <b>#${shortId(o.id)}</b>. Χρόνος παραγωγής: ${PRODUCTION_TIME}.</p>
+      `<p style="font-size:14px;line-height:1.6">Ευχαριστούμε! Ξεκινάμε την παραγωγή της παραγγελίας <b>#${shortId(o.id)}</b>. Χρόνος παραγωγής: ${esc(prodTime(o))}.</p>
 <p><a href="${SITE_URL}/paraggelia/${o.id}" style="color:#E2430F">Κατάσταση παραγγελίας</a></p>`
     ),
   });

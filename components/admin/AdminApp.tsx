@@ -12,7 +12,7 @@ type Order = {
   shipping_address: { address?: string; city?: string; postcode?: string; pickup_point?: string | null };
   shipping_method: string; shipping_cost: number; discount_amount: number; total: number;
   status: string; payment_provider: string; payment_status: string; notes: string | null;
-  tracking_number: string | null; admin_notes: string | null; order_items: OrderItem[];
+  tracking_number: string | null; admin_notes: string | null; production_time?: string | null; order_items: OrderItem[];
 };
 type Quote = {
   id: string; created_at: string; customer_name: string; customer_email: string; customer_phone: string | null;
@@ -33,7 +33,7 @@ const field = "border border-line bg-paper px-3 py-2 text-sm outline-none focus:
 const fmt = (d: string) => new Date(d).toLocaleString("el-GR", { dateStyle: "short", timeStyle: "short" });
 const money = (n: number) => `${Number(n).toFixed(2)} €`;
 
-async function callNotify(orderId: string, kind: "paid" | "shipped") {
+async function callNotify(orderId: string, kind: "paid" | "shipped" | "started") {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   if (!token) return false;
@@ -68,11 +68,12 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
   const [open, setOpen] = useState(o.status === "pending");
   const [tracking, setTracking] = useState(o.tracking_number ?? "");
   const [notes, setNotes] = useState(o.admin_notes ?? "");
+  const [prodTime, setProdTime] = useState(o.production_time ?? "");
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const a = o.shipping_address || {};
 
-  async function update(patch: Record<string, unknown>, notify?: "paid" | "shipped") {
+  async function update(patch: Record<string, unknown>, notify?: "paid" | "shipped" | "started") {
     setBusy(true);
     setMsg(null);
     const { error } = await supabase.from("orders").update(patch).eq("id", o.id);
@@ -155,11 +156,18 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
               <span className="text-wood">Tracking</span>
               <input className={field} value={tracking} onChange={(e) => setTracking(e.target.value)} placeholder="Αρ. αποστολής" />
             </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-wood">Χρόνος παραγωγής</span>
+              <input className={field} value={prodTime} onChange={(e) => setProdTime(e.target.value)} placeholder="π.χ. 3–4 εργάσιμες ημέρες" />
+            </label>
+            <button className={btn} disabled={busy} onClick={() => update({ status: "processing", production_time: prodTime.trim() || null }, "started")}>
+              Ξεκίνησα + email πελάτη
+            </button>
             <button className={btn} disabled={busy} onClick={() => update({ status: "shipped", tracking_number: tracking.trim() || null }, "shipped")}>
               Στάλθηκε + email πελάτη
             </button>
             {unpaidBank && (
-              <button className={btn} disabled={busy} onClick={() => update({ payment_status: "paid", status: o.status === "pending" ? "paid" : o.status }, "paid")}>
+              <button className={btn} disabled={busy} onClick={() => update({ payment_status: "paid", status: o.status === "pending" ? "paid" : o.status, production_time: prodTime.trim() || null }, "paid")}>
                 Η πληρωμή ήρθε ✓ (+email)
               </button>
             )}
@@ -167,7 +175,7 @@ function OrderCard({ o, reload }: { o: Order; reload: () => void }) {
           <div className="flex flex-col gap-2">
             <textarea className={field} rows={2} placeholder="Εσωτερικές σημειώσεις (δεν τις βλέπει ο πελάτης)" value={notes} onChange={(e) => setNotes(e.target.value)} />
             <div className="flex items-center gap-3">
-              <button className={btn} disabled={busy} onClick={() => update({ admin_notes: notes, tracking_number: tracking.trim() || null })}>Αποθήκευση</button>
+              <button className={btn} disabled={busy} onClick={() => update({ admin_notes: notes, tracking_number: tracking.trim() || null, production_time: prodTime.trim() || null })}>Αποθήκευση</button>
               <button className={btn} onClick={() => window.print()}>Εκτύπωση</button>
               <button className={`${btn} text-ember-dark`} disabled={busy} onClick={removeOrder}>Διαγραφή παραγγελίας</button>
               {msg && <span className="text-wood">{msg}</span>}
