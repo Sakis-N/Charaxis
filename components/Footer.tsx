@@ -1,12 +1,24 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BUSINESS } from "@/lib/business";
-import { getActiveCategories } from "@/lib/categories";
+import { getActiveCategories, type NavCategory } from "@/lib/categories";
 
 const link = "text-wood transition-colors duration-200 hover:text-ember";
 
-export default async function Footer() {
-  const categories = await getActiveCategories();
+export default function Footer() {
+  const [categories, setCategories] = useState<NavCategory[]>([]);
+  useEffect(() => {
+    let alive = true;
+    getActiveCategories().then((c) => {
+      if (alive) setCategories(c);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
   return (
     <footer id="contact">
       <div className="flex flex-wrap justify-between gap-12 border-t border-line px-6 py-16 md:px-16">
