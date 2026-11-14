@@ -112,7 +112,7 @@ export default async function ProductPage({
             {price ? `${pricing ? "από " : ""}${price.toFixed(2)} €${pricing ? " / τεμ." : ""}` : ""}
           </div>
           {product.description && (
-            <p className="max-w-md font-serif text-[15px] leading-relaxed text-wood">
+            <p className="max-w-md whitespace-pre-line font-serif text-[15px] leading-relaxed text-wood">
               {product.description}
             </p>
           )}
