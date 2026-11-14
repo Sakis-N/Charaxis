@@ -14,6 +14,7 @@ export type CustomField = {
   description?: string;
   placeholder?: string;
   hint?: string;
+  optional?: boolean; // για type: "photo" — αν true, η φωτογραφία/αρχείο δεν είναι υποχρεωτικό
   options?: string[]; // για type: "select"
   toggle_yes?: string; // για type: "toggle_text"
   toggle_no?: string;
@@ -182,7 +183,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
   const blockedToggle = fields.find(
     (f) => f.type === "toggle_text" && values[f.id] === true && !String(values[`${f.id}_value`] || "").trim()
   );
-  const missingPhoto = fields.find((f) => f.type === "photo" && !photos[f.id]);
+  const missingPhoto = fields.find((f) => f.type === "photo" && !f.optional && !photos[f.id]);
   const canAdd = !blockedToggle && !uploading && !missingPhoto && !sideProblem && (!pricing || unit !== null);
 
   const choiceBtn = (active: boolean) =>
