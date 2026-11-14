@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BUSINESS } from "@/lib/business";
+import { getActiveCategories } from "@/lib/categories";
 
 const link = "text-wood transition-colors duration-200 hover:text-ember";
 
-export default function Footer() {
+export default async function Footer() {
+  const categories = await getActiveCategories();
   return (
     <footer id="contact">
       <div className="flex flex-wrap justify-between gap-12 border-t border-line px-6 py-16 md:px-16">
@@ -17,9 +19,9 @@ export default function Footer() {
 
         <div className="flex flex-1 basis-[160px] flex-col gap-2.5 text-sm">
           <div className="mb-1 font-medium">Κατάστημα</div>
-          <Link href="/kategories/mpreloka" className={link}>Μπρελόκ</Link>
-          <Link href="/kategories/xaragmeni-fotografia" className={link}>Χαραγμένη Φωτογραφία</Link>
-          <Link href="/kategories/xristougeniatika-stolidia" className={link}>Χριστουγεννιάτικα Στολίδια</Link>
+          {categories.map((c) => (
+            <Link key={c.slug} href={`/kategories/${c.slug}`} className={link}>{c.name}</Link>
+          ))}
           <Link href="/prosfora" className={link}>Ζήτα Προσφορά</Link>
         </div>
 

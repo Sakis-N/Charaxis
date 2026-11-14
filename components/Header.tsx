@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
+import { supabase } from "@/lib/supabase/client";
 
 const navLinks = [
   { href: "/proionta", label: "Προϊόντα" },
-  { href: "/#categories", label: "Κατηγορίες" },
   { href: "/prosfora", label: "Ζήτα Προσφορά" },
   { href: "/epikoinonia", label: "Επικοινωνία" },
 ];
@@ -15,7 +15,44 @@ const navLinks = [
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [bump, setBump] = useState(false);
+  const [catOpen, setCatOpen] = useState(false);
+  const [mobileCatOpen, setMobileCatOpen] = useState(false);
+  const [cats, setCats] = useState<{ name: string; slug: string }[]>([]);
+  const catRef = useRef<HTMLDivElement>(null);
   const { count, ready } = useCart();
+
+  // Οι ενεργές κατηγορίες για το αναδιπλούμενο μενού.
+  useEffect(() => {
+    let alive = true;
+    supabase
+      .from("categories")
+      .select("name, slug")
+      .eq("active", true)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        if (alive && data) setCats(data as { name: string; slug: string }[]);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Κλείνει με κλικ έξω ή με Escape.
+  useEffect(() => {
+    if (!catOpen) return;
+    function onDown(e: MouseEvent) {
+      if (catRef.current && !catRef.current.contains(e.target as Node)) setCatOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setCatOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [catOpen]);
 
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | undefined;
@@ -55,7 +92,54 @@ export default function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-9 text-[15px] md:flex">
-          {navLinks.map((link) => (
+          <Link href="/proionta" className="relative py-1 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-ink after:transition-all after:duration-300 after:ease-out hover:after:w-full">
+            Προϊόντα
+          </Link>
+
+          <div
+            ref={catRef}
+            className="relative"
+            onMouseEnter={() => setCatOpen(true)}
+            onMouseLeave={() => setCatOpen(false)}
+          >
+            <button
+              type="button"
+              aria-haspopup="true"
+              aria-expanded={catOpen}
+              onClick={() => setCatOpen((v) => !v)}
+              className="flex items-center gap-1.5 py-1 transition-colors duration-200 hover:text-ember"
+            >
+              Κατηγορίες
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={`transition-transform duration-200 ${catOpen ? "rotate-180" : ""}`}>
+                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            {catOpen && (
+              <div className="absolute left-1/2 top-full z-50 -translate-x-1/2 pt-3">
+                <div className="min-w-[230px] border border-line bg-paper py-2 shadow-lg">
+                  {cats.map((c) => (
+                    <Link
+                      key={c.slug}
+                      href={`/kategories/${c.slug}`}
+                      onClick={() => setCatOpen(false)}
+                      className="block px-5 py-2.5 text-[15px] transition-colors duration-150 hover:bg-line/40 hover:text-ember"
+                    >
+                      {c.name}
+                    </Link>
+                  ))}
+                  <Link
+                    href="/proionta"
+                    onClick={() => setCatOpen(false)}
+                    className="mt-1 block border-t border-line px-5 py-2.5 text-[13px] text-wood transition-colors duration-150 hover:text-ember"
+                  >
+                    Όλα τα προϊόντα
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {navLinks.slice(1).map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -123,11 +207,41 @@ export default function Header() {
       {/* Mobile nav panel */}
       <div
         className={`overflow-hidden border-t border-line transition-[max-height] duration-300 ease-out md:hidden ${
-          open ? "max-h-80" : "max-h-0 border-t-0"
+          open ? "max-h-[36rem]" : "max-h-0 border-t-0"
         }`}
       >
         <nav className="flex flex-col gap-1 px-5 py-3">
-          {navLinks.map((link) => (
+          <Link href="/proionta" onClick={() => setOpen(false)} className="rounded px-2 py-3 text-base active:bg-line/40">
+            Προϊόντα
+          </Link>
+
+          <button
+            type="button"
+            aria-expanded={mobileCatOpen}
+            onClick={() => setMobileCatOpen((v) => !v)}
+            className="flex items-center justify-between rounded px-2 py-3 text-left text-base active:bg-line/40"
+          >
+            Κατηγορίες
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={`transition-transform duration-200 ${mobileCatOpen ? "rotate-180" : ""}`}>
+              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          {mobileCatOpen && (
+            <div className="mb-1 flex flex-col border-l border-line pl-3">
+              {cats.map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/kategories/${c.slug}`}
+                  onClick={() => { setOpen(false); setMobileCatOpen(false); }}
+                  className="rounded px-3 py-2.5 text-[15px] text-wood active:bg-line/40"
+                >
+                  {c.name}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {navLinks.slice(1).map((link) => (
             <Link
               key={link.href}
               href={link.href}

@@ -1,10 +1,7 @@
-const categories = [
-  { name: "Μπρελόκ", href: "/kategories/mpreloka" },
-  { name: "Χαραγμένη Φωτογραφία", href: "/kategories/xaragmeni-fotografia" },
-  { name: "Χριστουγεννιάτικα Στολίδια", href: "/kategories/xristougeniatika-stolidia" },
-];
+import { getActiveCategories } from "@/lib/categories";
 
-export default function Categories() {
+export default async function Categories() {
+  const categories = (await getActiveCategories()).map((c) => ({ name: c.name, href: `/kategories/${c.slug}` }));
   return (
     <section id="categories" className="flex flex-col gap-9 px-6 py-14 md:px-16 md:py-24">
       <h2 className="text-[26px] font-medium">Κατηγορίες</h2>
