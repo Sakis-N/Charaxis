@@ -1,65 +1,65 @@
 import Image from "next/image";
+import Link from "next/link";
 import { getActiveCategories } from "@/lib/categories";
+import Reveal from "@/components/Reveal";
 
+// Κατηγορίες σε "bento" πλέγμα: η πρώτη μεγάλη, οι υπόλοιπες γύρω της.
 export default async function Categories() {
   const categories = await getActiveCategories();
-  return (
-    <section id="categories" className="flex flex-col gap-9 px-6 py-14 md:px-16 md:py-24">
-      <h2 className="text-[26px] font-medium">Κατηγορίες</h2>
-      <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-4">
-        {categories.map((cat) => (
-          <a key={cat.slug} href={`/kategories/${cat.slug}`} className="group flex flex-col gap-3.5">
-            <div className="placeholder-tile relative h-[220px] overflow-hidden rounded-sm after:absolute after:bottom-0 after:left-0 after:z-10 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-ember after:transition-transform after:duration-500 group-hover:after:scale-x-100">
-              {cat.cover ? (
-                <Image
-                  src={cat.cover}
-                  alt={cat.name}
-                  fill
-                  sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <span className="inline-block">{cat.name}</span>
-              )}
-            </div>
-            <div className="flex items-center justify-between border-t border-line pt-3">
-              <h3 className="text-[15px] font-medium transition-colors duration-200 group-hover:text-ember">
-                {cat.name}
-              </h3>
-              <span className="text-[13px] text-wood">
-                {cat.count > 0 ? `${cat.count} ${cat.count === 1 ? "προϊόν" : "προϊόντα"}` : "Δες προϊόντα"}
-              </span>
-            </div>
-          </a>
-        ))}
+  if (categories.length === 0) return null;
 
-        <a
-          id="quote"
-          href="/prosfora"
-          className="group flex h-[220px] flex-col items-center justify-center gap-3 border border-dashed border-line p-6 text-center transition-colors duration-200 hover:border-ember"
-        >
-          <svg
-            width="26"
-            height="26"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            className="transition-colors duration-200"
+  return (
+    <section id="categories" className="flex scroll-mt-24 flex-col gap-10 px-6 py-16 md:px-12 md:py-24 lg:px-16">
+      <Reveal className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-3">
+          <span className="text-[12px] font-semibold uppercase tracking-[0.2em] text-ember">Η συλλογή</span>
+          <h2 className="text-[32px] font-semibold leading-tight tracking-tight md:text-[44px]">Τι θα χαράξουμε για σένα;</h2>
+        </div>
+        <Link href="/proionta" className="text-[14px] font-semibold underline-offset-4 hover:text-ember hover:underline">
+          Όλα τα προϊόντα →
+        </Link>
+      </Reveal>
+
+      <div className="grid auto-rows-[200px] grid-cols-2 gap-3 md:auto-rows-[240px] md:grid-cols-4 md:gap-5">
+        {categories.map((cat, i) => (
+          <Link
+            key={cat.slug}
+            href={`/kategories/${cat.slug}`}
+            className={`group relative overflow-hidden rounded-xl bg-line/50 ${
+              i === 0 ? "col-span-2 row-span-2" : ""
+            }`}
           >
-            <path
-              d="M12 5v14M5 12h14"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              className="text-wood transition-colors duration-200 group-hover:text-ember"
-            />
-          </svg>
-          <h3 className="text-[15px] font-medium">Κάτι άλλο;</h3>
-          <p className="max-w-[200px] font-serif text-[13.5px] leading-relaxed text-wood">
-            Ρολόγια, φωτιστικά, επιγραφές, χάραξη σε μαχαίρια και ό,τι άλλο
-            φανταστείς — ζήτα προσφορά.
-          </p>
-        </a>
+            {cat.cover ? (
+              <Image
+                src={cat.cover}
+                alt={cat.name}
+                fill
+                sizes={i === 0 ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 768px) 25vw, 50vw"}
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+              />
+            ) : (
+              <div className="placeholder-tile h-full" />
+            )}
+            <span className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent transition-opacity duration-300 group-hover:from-ink/90" />
+            <span className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3 md:inset-x-6 md:bottom-6">
+              <span className="flex flex-col gap-1">
+                <span className={`font-semibold leading-tight text-paper ${i === 0 ? "text-[24px] md:text-[34px]" : "text-[16px] md:text-[20px]"}`}>
+                  {cat.name}
+                </span>
+                {cat.count > 0 && (
+                  <span className="text-[12.5px] text-paper/75">
+                    {cat.count} {cat.count === 1 ? "προϊόν" : "προϊόντα"}
+                  </span>
+                )}
+              </span>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-paper text-ink transition-all duration-300 group-hover:bg-ember group-hover:text-paper md:h-11 md:w-11">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-0.5">
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </span>
+          </Link>
+        ))}
       </div>
     </section>
   );

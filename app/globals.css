@@ -129,3 +129,67 @@
 .laser-mark {
   animation: laser-burn 5s ease-out forwards;
 }
+
+/* Κυλιόμενη λωρίδα (Marquee). */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marquee {
+    animation: marquee 38s linear infinite;
+  }
+}
+
+/* Εμφάνιση ενοτήτων καθώς κατεβαίνει ο επισκέπτης. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ακτίνα λέιζερ που περνά οριζόντια στη σκούρα ενότητα. */
+.laser-sweep {
+  background: linear-gradient(90deg, transparent 0%, rgba(226, 67, 15, 0) 35%, rgba(255, 122, 47, 0.9) 50%, rgba(226, 67, 15, 0) 65%, transparent 100%);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  opacity: 0.55;
+}
+
+@keyframes sweep {
+  from {
+    background-position: -60% 0;
+  }
+  to {
+    background-position: 160% 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .laser-sweep {
+    animation: sweep 6s ease-in-out infinite;
+  }
+}
+
+/* Κρυφή μπάρα κύλισης στις οριζόντιες λίστες του κινητού. */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
