@@ -18,6 +18,10 @@ export const BUSINESS = {
 // Χρόνοι που αναφέρονται στις σελίδες πληροφοριών. Άλλαξέ τους εδώ αν
 // δουλεύεις με διαφορετικούς ρυθμούς.
 export const PRODUCTION_TIME = "2–5 εργάσιμες ημέρες";
+// Οι ίδιοι χρόνοι σε αριθμούς, για την εκτίμηση παράδοσης στη σελίδα προϊόντος.
+// Κράτα τους σε συμφωνία με τα κείμενα (PRODUCTION_TIME / DELIVERY_TIMES).
+export const PRODUCTION_DAYS: [number, number] = [2, 5];
+export const DELIVERY_DAYS: [number, number] = [1, 4];
 export const DELIVERY_TIMES: Record<string, string> = {
   acs: "1–3 εργάσιμες ημέρες",
   boxnow: "1–3 εργάσιμες ημέρες",

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Manrope, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart";
+import CartDrawer from "@/components/CartDrawer";
+import SearchOverlay from "@/components/SearchOverlay";
 import { SITE_URL } from "@/lib/site";
 
 // Manrope — τίτλοι, navigation, τιμές, κουμπιά: καθαρή, "μηχανική"
@@ -46,7 +48,11 @@ export default function RootLayout({
   return (
     <html lang="el" className={`${display.variable} ${serif.variable}`}>
       <body className="bg-paper font-display text-ink antialiased">
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          {children}
+          <CartDrawer />
+          <SearchOverlay />
+        </CartProvider>
       </body>
     </html>
   );

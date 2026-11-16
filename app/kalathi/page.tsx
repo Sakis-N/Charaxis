@@ -85,6 +85,9 @@ export default function CartPage() {
               <Link href="/checkout" className="bg-ink px-7 py-3 text-center text-sm font-medium text-paper transition-colors duration-200 hover:bg-ember">
                 Συνέχεια στην παραγγελία
               </Link>
+              <Link href="/proionta" className="text-center text-sm text-wood underline underline-offset-2 hover:text-ember">
+                Συνέχεια αγορών
+              </Link>
             </aside>
           </div>
         )}

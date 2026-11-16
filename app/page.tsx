@@ -1,8 +1,10 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import HowItWorks from "@/components/HowItWorks";
+import Marquee from "@/components/Marquee";
 import Categories from "@/components/Categories";
+import GiftIdeas from "@/components/GiftIdeas";
 import FeaturedProducts from "@/components/FeaturedProducts";
+import HowItWorks from "@/components/HowItWorks";
 import QuoteBand from "@/components/QuoteBand";
 import Footer from "@/components/Footer";
 
@@ -14,9 +16,11 @@ export default function HomePage() {
     <main className="flex flex-col overflow-x-hidden">
       <Header />
       <Hero />
-      <HowItWorks />
+      <Marquee />
       <Categories />
+      <GiftIdeas />
       <FeaturedProducts />
+      <HowItWorks />
       <QuoteBand />
       <Footer />
     </main>
