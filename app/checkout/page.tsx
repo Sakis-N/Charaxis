@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase/client";
 import { useCart } from "@/lib/cart";
+import { saveOrder } from "@/lib/myOrders";
 
 const METHODS = [
   { code: "acs", label: "ACS Courier στο σπίτι", note: "Παράδοση στη διεύθυνσή σου" },
@@ -161,6 +162,7 @@ export default function CheckoutPage() {
       return;
     }
     const orderId = (data as { order_id: string }).order_id;
+    saveOrder({ id: orderId, at: new Date().toISOString(), total: Math.round(total * 100) / 100 });
 
     try {
       if (remember) {

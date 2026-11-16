@@ -9,6 +9,9 @@ import ProductGallery from "@/components/ProductGallery";
 import AddToCartButton from "@/components/AddToCartButton";
 import ProductCard, { type CardProduct } from "@/components/ProductCard";
 import TrustBadges from "@/components/TrustBadges";
+import ShareButton from "@/components/ShareButton";
+import DeliveryEstimate from "@/components/DeliveryEstimate";
+import RecentlyViewed from "@/components/RecentlyViewed";
 import { minPrice, type Pricing } from "@/lib/pricing";
 import { SITE_URL } from "@/lib/site";
 
@@ -183,8 +186,11 @@ export default async function ProductPage({
           <h1 className="text-[28px] font-medium leading-tight md:text-[34px]">
             {product.name}
           </h1>
-          <div className="text-2xl font-medium text-ember">
-            {price ? `${pricing ? "από " : ""}${price.toFixed(2)} €${pricing ? " / τεμ." : ""}` : ""}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-2xl font-medium text-ember">
+              {price ? `${pricing ? "από " : ""}${price.toFixed(2)} €${pricing ? " / τεμ." : ""}` : ""}
+            </div>
+            <ShareButton title={product.name} />
           </div>
           {product.description && (
             <p className="max-w-md whitespace-pre-line font-serif text-[15px] leading-relaxed text-wood">
@@ -192,6 +198,7 @@ export default async function ProductPage({
             </p>
           )}
 
+          <DeliveryEstimate />
           <TrustBadges />
 
           {product.is_customizable ? (
@@ -242,6 +249,15 @@ export default async function ProductPage({
           </div>
         </section>
       )}
+
+      <RecentlyViewed
+        current={{
+          slug: product.slug,
+          name: product.name,
+          image: images[0] ?? null,
+          price: price ? `${pricing ? "από " : ""}${price.toFixed(2)} €` : "",
+        }}
+      />
 
       <Footer />
     </main>

@@ -136,7 +136,7 @@ export default function Header() {
   }
 
   const navItem =
-    "relative py-2 text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 hover:text-ember after:absolute after:bottom-0.5 after:left-0 after:h-[1.5px] after:w-0 after:bg-ember after:transition-all after:duration-300 after:ease-out hover:after:w-full";
+    "relative whitespace-nowrap py-2 text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-200 hover:text-ember after:absolute after:bottom-0.5 after:left-0 after:h-[1.5px] after:w-0 after:bg-ember after:transition-all after:duration-300 after:ease-out hover:after:w-full";
 
   return (
     <>
@@ -186,7 +186,7 @@ export default function Header() {
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden items-center justify-center gap-9 md:flex lg:gap-11" aria-label="Κύριο μενού">
+          <nav className="hidden items-center justify-center gap-6 md:flex lg:gap-8 xl:gap-10" aria-label="Κύριο μενού">
             <Link href="/proionta" className={navItem} onMouseEnter={closeMegaSoon}>
               Προϊόντα
             </Link>
@@ -215,9 +215,34 @@ export default function Header() {
           <div className="flex items-center justify-end gap-2 md:gap-3">
             <Link
               href="/prosfora"
-              className="hidden items-center gap-2 border border-ink px-4 py-2.5 text-[13px] font-semibold transition-colors duration-200 hover:border-ember hover:bg-ember hover:text-paper lg:flex"
+              className="hidden items-center gap-2 whitespace-nowrap border border-ink px-4 py-2.5 text-[13px] font-semibold transition-colors duration-200 hover:border-ember hover:bg-ember hover:text-paper 2xl:flex"
             >
               Ζήτα προσφορά
+            </Link>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent("search:open"))}
+              aria-label="Αναζήτηση"
+              className="group flex h-10 items-center gap-2 rounded-full px-2.5 transition-colors hover:bg-line/50 md:border md:border-line md:pl-3.5 md:pr-2 md:hover:border-ink"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7" />
+                <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
+              <span className="hidden text-[13px] text-wood lg:inline">Αναζήτηση</span>
+              <kbd className="hidden rounded border border-line px-1.5 py-0.5 font-display text-[10.5px] text-faint xl:inline">Ctrl K</kbd>
+            </button>
+            <Link
+              href="/parakolouthisi"
+              aria-label="Η παραγγελία μου"
+              title="Η παραγγελία μου"
+              className="hidden h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-line/50 hover:text-ember md:flex"
+            >
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                <circle cx="7" cy="17.5" r="1.6" stroke="currentColor" strokeWidth="1.6" />
+                <circle cx="17" cy="17.5" r="1.6" stroke="currentColor" strokeWidth="1.6" />
+              </svg>
             </Link>
             {BUSINESS.instagram && (
               <a
@@ -225,7 +250,7 @@ export default function Header() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
-                className="hidden h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-line/50 hover:text-ember md:flex"
+                className="hidden h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-line/50 hover:text-ember lg:flex"
               >
                 <InstaIcon />
               </a>
@@ -336,6 +361,7 @@ export default function Header() {
             {[
               { href: "/proionta", label: "Όλα τα προϊόντα" },
               { href: "/#idees-dorou", label: "Ιδέες δώρου" },
+              { href: "/parakolouthisi", label: "Πού είναι η παραγγελία μου;" },
               { href: "/faq", label: "Συχνές ερωτήσεις" },
               { href: "/epikoinonia", label: "Επικοινωνία" },
             ].map((l) => (

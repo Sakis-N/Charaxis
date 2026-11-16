@@ -71,6 +71,7 @@ export default function Footer() {
 
         <div className="flex flex-col gap-3 text-[14px]">
           <div className="mb-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-paper/45">Βοήθεια</div>
+          <Link href="/parakolouthisi" className={link}>Παρακολούθηση παραγγελίας</Link>
           <Link href="/apostoli-pliromi" className={link}>Αποστολή & πληρωμή</Link>
           <Link href="/epistrofes" className={link}>Επιστροφές & ακυρώσεις</Link>
           <Link href="/faq" className={link}>Συχνές ερωτήσεις</Link>
