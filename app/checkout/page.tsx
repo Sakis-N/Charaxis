@@ -12,9 +12,7 @@ import FreeShippingBar, { useFreeShippingFrom } from "@/components/FreeShippingB
 
 const METHODS = [
   { code: "acs", label: "ACS Courier στο σπίτι", note: "Παράδοση στη διεύθυνσή σου" },
-  { code: "boxnow", label: "BoxNow (θυρίδα)", note: "Παραλαβή από θυρίδα BoxNow" },
-  { code: "skroutz", label: "Skroutz Last Mile", note: "Παραλαβή από σημείο Skroutz" },
-] as const;
+  { code: "boxnow", label: "BoxNow (θυρίδα)", note: "Παραλαβή από θυρίδα BoxNow" },] as const;
 
 const STRIPE_ENABLED = process.env.NEXT_PUBLIC_STRIPE_ENABLED === "true";
 const IRIS_ENABLED = process.env.NEXT_PUBLIC_IRIS_ENABLED === "true";
@@ -268,7 +266,7 @@ export default function CheckoutPage() {
             <input
               required
               className={input}
-              placeholder={pickup ? (method === "boxnow" ? "Όνομα / διεύθυνση θυρίδας BoxNow" : "Όνομα / διεύθυνση σημείου Skroutz") : "Οδός και αριθμός"}
+              placeholder={pickup ? "Όνομα / διεύθυνση θυρίδας BoxNow" : "Οδός και αριθμός"}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               autoComplete={pickup ? "off" : "street-address"}
