@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase/client";
 import { useCart } from "@/lib/cart";
 import { saveOrder } from "@/lib/myOrders";
+import FreeShippingBar, { useFreeShippingFrom } from "@/components/FreeShippingBar";
 
 const METHODS = [
   { code: "acs", label: "ACS Courier στο σπίτι", note: "Παράδοση στη διεύθυνσή σου" },
@@ -113,7 +114,10 @@ export default function CheckoutPage() {
     const d = couponInfo.type === "percentage" ? (subtotal * couponInfo.value) / 100 : couponInfo.value;
     return Math.min(Math.round(d * 100) / 100, subtotal);
   }, [couponInfo, subtotal]);
-  const total = subtotal - discount + (shipCost ?? 0);
+  // Δωρεάν μεταφορικά πάνω από το όριο (ο server εφαρμόζει τον ίδιο κανόνα).
+  const freeFrom = useFreeShippingFrom();
+  const freeShip = freeFrom != null && subtotal - discount >= freeFrom;
+  const total = subtotal - discount + (freeShip ? 0 : shipCost ?? 0);
 
   async function applyCoupon() {
     setCouponMsg(null);
@@ -246,9 +250,15 @@ export default function CheckoutPage() {
                     <span className="block text-[13px] text-wood">{m.note}</span>
                   </span>
                 </span>
-                {methodCosts[m.code] != null && (
-                  <span className="shrink-0 font-medium">{methodCosts[m.code].toFixed(2)} €</span>
-                )}
+                {methodCosts[m.code] != null &&
+                  (freeShip ? (
+                    <span className="flex shrink-0 items-center gap-2">
+                      <span className="text-faint line-through">{methodCosts[m.code].toFixed(2)} €</span>
+                      <span className="font-semibold text-[#5A6B2A]">Δωρεάν</span>
+                    </span>
+                  ) : (
+                    <span className="shrink-0 font-medium">{methodCosts[m.code].toFixed(2)} €</span>
+                  ))}
               </label>
             ))}
           </fieldset>
@@ -339,10 +349,15 @@ export default function CheckoutPage() {
           </div>
           {couponMsg && <p className="-mt-3 text-xs text-wood">{couponMsg}</p>}
 
+          <FreeShippingBar amount={subtotal - discount} compact />
+
           <div className="flex flex-col gap-2 border-t border-line pt-4 text-sm">
             <div className="flex justify-between"><span className="text-wood">Υποσύνολο</span><span>{subtotal.toFixed(2)} €</span></div>
             {discount > 0 && <div className="flex justify-between"><span className="text-wood">Έκπτωση</span><span>−{discount.toFixed(2)} €</span></div>}
-            <div className="flex justify-between"><span className="text-wood">Μεταφορικά</span><span>{shipCost == null ? "…" : `${shipCost.toFixed(2)} €`}</span></div>
+            <div className="flex justify-between">
+              <span className="text-wood">Μεταφορικά</span>
+              <span>{freeShip ? <b className="text-[#5A6B2A]">Δωρεάν</b> : shipCost == null ? "…" : `${shipCost.toFixed(2)} €`}</span>
+            </div>
             <div className="mt-1 flex justify-between border-t border-line pt-3 text-base font-semibold"><span>Σύνολο</span><span className="text-ember">{total.toFixed(2)} €</span></div>
           </div>
 

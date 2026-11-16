@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart";
 import { PRODUCTION_TIME } from "@/lib/business";
+import FreeShippingBar from "@/components/FreeShippingBar";
 
 // Πλαϊνό συρτάρι που ανοίγει μόλις μπει κάτι στο καλάθι: ο πελάτης βλέπει
 // αμέσως τι πρόσθεσε και διαλέγει "Ολοκλήρωση" ή "Συνέχεια αγορών".
@@ -133,6 +134,7 @@ export default function CartDrawer() {
             </ul>
 
             <div className="flex flex-col gap-3 border-t border-line px-6 py-5" style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))" }}>
+              <FreeShippingBar amount={subtotal} compact />
               <div className="flex justify-between text-[15px]">
                 <span className="text-wood">Υποσύνολο</span>
                 <span className="font-semibold">{subtotal.toFixed(2)} €</span>

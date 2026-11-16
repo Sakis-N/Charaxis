@@ -1,19 +1,26 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import { DELIVERY_TIMES, PRODUCTION_TIME } from "@/lib/business";
+import { euroShort, freeShippingFrom } from "@/lib/freeShipping";
 
 export const metadata: Metadata = {
   title: "Αποστολή & πληρωμή — Charaxis",
   description: "Τρόποι αποστολής, κόστος μεταφορικών, χρόνοι παράδοσης και τρόποι πληρωμής.",
 };
 
-export default function ShippingPage() {
+export const revalidate = 300;
+
+export default async function ShippingPage() {
+  const free = await freeShippingFrom();
   return (
     <PageShell title="Αποστολή & πληρωμή" intro="Όλα όσα χρειάζεται να ξέρεις για το πότε και πώς φτάνει η παραγγελία σου.">
       <h2>Χρόνος παραγωγής</h2>
       <p>Κάθε κομμάτι φτιάχνεται κατόπιν παραγγελίας. Ο συνήθης χρόνος παραγωγής είναι {PRODUCTION_TIME}, από την επιβεβαίωση της πληρωμής. Σε περιόδους αιχμής (π.χ. πριν τα Χριστούγεννα) μπορεί να χρειαστεί λίγο παραπάνω· παράγγελνε νωρίς αν το θες για συγκεκριμένη ημερομηνία.</p>
 
       <h2>Τρόποι αποστολής</h2>
+      {free && (
+        <p><b>🚚 Δωρεάν μεταφορικά για παραγγελίες από {euroShort(free)}</b> (μετά από τυχόν έκπτωση κουπονιού), με όποιον τρόπο αποστολής διαλέξεις.</p>
+      )}
       <ul>
         <li><b>ACS Courier στο σπίτι ή στη δουλειά:</b> 3,50 €. Για δυσπρόσιτες περιοχές (ΔΠ — νησιά και απομακρυσμένα χωριά) το κόστος είναι 5,00 €. Η τιμή υπολογίζεται αυτόματα από τον ΤΚ στο checkout. Παράδοση: {DELIVERY_TIMES.acs}.</li>
         <li><b>BoxNow (παραλαβή από θυρίδα):</b> 2,00 €. Παράδοση: {DELIVERY_TIMES.boxnow}.</li>

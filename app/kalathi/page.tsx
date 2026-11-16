@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cart";
+import FreeShippingBar from "@/components/FreeShippingBar";
 
 export default function CartPage() {
   const { items, ready, subtotal, setQty, remove } = useCart();
@@ -77,6 +78,7 @@ export default function CartPage() {
             </ul>
 
             <aside className="flex h-fit flex-col gap-4 border border-line p-6">
+              <FreeShippingBar amount={subtotal} />
               <div className="flex justify-between text-sm">
                 <span className="text-wood">Υποσύνολο</span>
                 <span className="font-medium">{subtotal.toFixed(2)} €</span>

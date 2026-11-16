@@ -319,7 +319,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
                     <span>{Number(i.line_total).toFixed(2)} €</span>
                   </li>
                 ))}
-                <li className="flex justify-between text-wood"><span>Μεταφορικά</span><span>{Number(order.shipping).toFixed(2)} €</span></li>
+                <li className="flex justify-between text-wood"><span>Μεταφορικά</span><span>{Number(order.shipping) === 0 ? "Δωρεάν" : `${Number(order.shipping).toFixed(2)} €`}</span></li>
                 {Number(order.discount) > 0 && <li className="flex justify-between text-wood"><span>Έκπτωση</span><span>−{Number(order.discount).toFixed(2)} €</span></li>}
                 <li className="flex justify-between font-semibold"><span>Σύνολο</span><span>{Number(order.total).toFixed(2)} €</span></li>
               </ul>

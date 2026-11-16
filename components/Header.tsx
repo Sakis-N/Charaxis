@@ -7,11 +7,12 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart";
 import { getActiveCategories, type NavCategory } from "@/lib/categories";
 import { BUSINESS, PRODUCTION_TIME } from "@/lib/business";
+import { getFreeShippingFrom } from "@/components/FreeShippingBar";
 
 // Σύντομα, ώστε να χωράνε σε μία γραμμή και στο κινητό.
 const BASE_MESSAGES = [
+  "Αποστολή σε όλη την Ελλάδα · ACS, BoxNow",
   `Χειροποίητο · Παραγωγή σε ${PRODUCTION_TIME}`,
-  "Αποστολή σε όλη την Ελλάδα · ACS, BoxNow, Skroutz",
 ];
 // Εποχικό μήνυμα μόνο Νοέμβριο–Δεκέμβριο.
 const XMAS = "🎄 Δώρα Χριστουγέννων: παράγγειλε νωρίς";
@@ -21,7 +22,10 @@ function AnnouncementBar() {
   const [messages, setMessages] = useState(BASE_MESSAGES);
   useEffect(() => {
     const m = new Date().getMonth();
-    if (m === 10 || m === 11) setMessages([XMAS, ...BASE_MESSAGES]);
+    getFreeShippingFrom().then((from) => {
+      const free = from ? [`🚚 Δωρεάν μεταφορικά για αγορές από ${from % 1 ? from.toFixed(2).replace(".", ",") : from} €`] : [];
+      setMessages([...free, ...(m === 10 || m === 11 ? [XMAS] : []), ...BASE_MESSAGES]);
+    });
   }, []);
   const MESSAGES = messages;
   useEffect(() => {

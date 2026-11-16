@@ -12,12 +12,17 @@ export default function SettingsAdmin() {
   const [methods, setMethods] = useState<SM[]>([]);
   const [areas, setAreas] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+  const [freeFrom, setFreeFrom] = useState("");
+  const [freeMsg, setFreeMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const [{ data: m }, { data: a }] = await Promise.all([
+    const [{ data: m }, { data: a }, { data: s }] = await Promise.all([
       supabase.from("shipping_methods").select("*").order("sort_order"),
       supabase.from("acs_remote_areas").select("postcode_prefix").order("postcode_prefix"),
+      supabase.from("shop_settings").select("value").eq("key", "free_shipping_from").maybeSingle(),
     ]);
+    const v = (s as { value: unknown } | null)?.value;
+    setFreeFrom(typeof v === "number" && v > 0 ? String(v) : "");
     setMethods((m ?? []) as SM[]);
     setAreas(((a ?? []) as { postcode_prefix: string }[]).map((x) => x.postcode_prefix).join(", "));
   }, []);
@@ -40,8 +45,30 @@ export default function SettingsAdmin() {
     load();
   }
 
+  async function saveFree() {
+    setFreeMsg(null);
+    const n = freeFrom.trim() === "" ? 0 : Number(freeFrom.replace(",", "."));
+    if (!isFinite(n) || n < 0) { setFreeMsg("Βάλε έγκυρο ποσό (ή κενό για καθόλου δωρεάν μεταφορικά)."); return; }
+    const { error } = await supabase.from("shop_settings").upsert({ key: "free_shipping_from", value: n, updated_at: new Date().toISOString() });
+    setFreeMsg(error ? error.message : n > 0 ? `✓ Δωρεάν μεταφορικά από ${n} €` : "✓ Χωρίς δωρεάν μεταφορικά");
+  }
+
   return (
     <div className="flex flex-col gap-8 text-sm">
+      <div className="flex flex-col gap-3 rounded-xl border border-line p-4">
+        <b>🚚 Δωρεάν μεταφορικά</b>
+        <p className="font-serif text-wood">
+          Από αυτό το ποσό και πάνω (μετά την έκπτωση κουπονιού) τα μεταφορικά είναι δωρεάν, για όλους τους τρόπους αποστολής. Άφησέ το κενό για να το σταματήσεις.
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2">Από €
+            <input className={`${field} w-24`} inputMode="decimal" value={freeFrom} onChange={(e) => setFreeFrom(e.target.value)} placeholder="π.χ. 50" />
+          </label>
+          <button className={btn} onClick={saveFree}>Αποθήκευση</button>
+          {freeMsg && <span className="text-wood">{freeMsg}</span>}
+        </div>
+      </div>
+
       <div className="flex flex-col gap-3">
         <b>Μεταφορικά</b>
         {methods.map((m, i) => (

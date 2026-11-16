@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import { DELIVERY_TIMES, PRODUCTION_TIME } from "@/lib/business";
+import { euroShort, freeShippingFrom } from "@/lib/freeShipping";
 
 export const metadata: Metadata = { title: "Συχνές ερωτήσεις — Charaxis" };
 
@@ -16,11 +17,17 @@ const faq: [string, React.ReactNode][] = [
   ["Τι γίνεται αν το προϊόν φτάσει χαλασμένο;", "Στείλε μας φωτογραφίες εντός 3 ημερών από την παραλαβή και το φτιάχνουμε ξανά ή επιστρέφουμε τα χρήματα."],
 ];
 
-export default function FaqPage() {
+export const revalidate = 300;
+
+export default async function FaqPage() {
+  const free = await freeShippingFrom();
+  const list = faq.map(([q, a]): [string, React.ReactNode] =>
+    q === "Πόσο κοστίζουν τα μεταφορικά;" && free ? [q, `${a} Δωρεάν για παραγγελίες από ${euroShort(free)}.`] : [q, a]
+  );
   return (
     <PageShell title="Συχνές ερωτήσεις">
       <div className="flex flex-col divide-y divide-line border-y border-line">
-        {faq.map(([q, a]) => (
+        {list.map(([q, a]) => (
           <details key={q} className="group py-4">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[16px] font-medium">
               {q}
