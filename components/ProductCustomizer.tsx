@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { useCart } from "@/lib/cart";
 import { flyToCart } from "@/components/flyToCart";
+import EngravePreview from "@/components/EngravePreview";
 import { SIDE_CHOICES, rangeLabel, tierPrice, tiersFor, variantKey, type Pricing } from "@/lib/pricing";
 
 export type CustomField = {
@@ -34,8 +35,23 @@ type Props = {
 
 type Values = Record<string, string | boolean>;
 
+// Πεδία που είναι οδηγίες προς εμάς και όχι κείμενο προς χάραξη.
+const isNotesField = (f: CustomField) => /note|comment|sxoli|σχόλ|οδηγ/i.test(`${f.id} ${f.label}`);
+
 export default function ProductCustomizer({ productId, slug, image, productName, basePrice, fields, pricing }: Props) {
   const cart = useCart();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const actionRef = useRef<HTMLDivElement>(null);
+  const [actionVisible, setActionVisible] = useState(true);
+
+  // Η κάτω μπάρα στο κινητό εμφανίζεται μόνο όταν το κανονικό κουμπί δεν φαίνεται.
+  useEffect(() => {
+    const el = actionRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setActionVisible(e.isIntersecting), { rootMargin: "0px 0px -40px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   const [photos, setPhotos] = useState<Record<string, string>>({});
   const [fileNames, setFileNames] = useState<Record<string, string>>({});
   const [previews, setPreviews] = useState<Record<string, string | null>>({});
@@ -186,6 +202,45 @@ export default function ProductCustomizer({ productId, slug, image, productName,
   const missingPhoto = fields.find((f) => f.type === "photo" && !f.optional && !photos[f.id]);
   const canAdd = !blockedToggle && !uploading && !missingPhoto && !sideProblem && (!pricing || unit !== null);
 
+  // ---- Ζωντανή προεπισκόπηση: ό,τι γράφει/ανεβάζει ο πελάτης για χάραξη ----
+  const previewLines: string[] = [];
+  let previewPhoto: string | null = null;
+  let hasEngravable = false;
+  for (const f of fields) {
+    if (isNotesField(f)) continue;
+    if (f.type === "text") {
+      hasEngravable = true;
+      previewLines.push(String(values[f.id] || ""));
+    } else if (f.type === "textarea") {
+      hasEngravable = true;
+      previewLines.push(...String(values[f.id] || "").split("\n"));
+    } else if (f.type === "photo") {
+      hasEngravable = true;
+      previewPhoto = previewPhoto ?? previews[f.id] ?? null;
+    } else if (f.type === "side") {
+      hasEngravable = true;
+      if (choiceOf(f) === "text") previewLines.push(textOf(f));
+      if (choiceOf(f) === "logo") previewPhoto = previewPhoto ?? previews[f.id] ?? null;
+    } else if (f.type === "addon" && addonChoice) {
+      if (addonChoice.input === "text") previewLines.push(String(values[`${f.id}_value`] || ""));
+      if (addonChoice.input === "photo") previewPhoto = previewPhoto ?? previews[f.id] ?? null;
+    }
+  }
+
+  const firstProblem =
+    (blockedToggle && `Συμπλήρωσε το πεδίο για «${blockedToggle.label}».`) ||
+    sideProblem ||
+    (missingPhoto && `Ανέβασε τη φωτογραφία «${missingPhoto.label}».`) ||
+    null;
+
+  function onStickyClick(btn: HTMLElement) {
+    if (canAdd) {
+      addToCart(btn);
+      return;
+    }
+    rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   const choiceBtn = (active: boolean) =>
     `border px-5 py-2 text-sm transition-colors duration-200 ${
       active ? "border-ink bg-ink text-paper" : "border-line hover:border-ink"
@@ -194,8 +249,12 @@ export default function ProductCustomizer({ productId, slug, image, productName,
     "w-full max-w-md border border-line bg-paper px-4 py-3 text-sm outline-none transition-colors duration-200 focus:border-ink";
 
   return (
-    <div className="flex flex-col gap-8 border border-line bg-paper p-6 md:p-8">
+    <div ref={rootRef} className="flex scroll-mt-28 flex-col gap-8 border border-line bg-paper p-6 md:p-8">
       <h2 className="text-xl font-semibold">Προσαρμόσε το σχέδιο</h2>
+
+      {hasEngravable && (
+        <EngravePreview lines={previewLines} photo={previewPhoto} />
+      )}
 
       {fields.map((field, idx) => (
         <div key={field.id} className="flex flex-col gap-3">
@@ -457,7 +516,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
+      <div ref={actionRef} className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
         <div className="flex flex-col text-lg font-medium text-ember">
           {unit ? (
             pricing ? (
@@ -501,6 +560,34 @@ export default function ProductCustomizer({ productId, slug, image, productName,
           </Link>
         </p>
       )}
+
+      {/* Κινητό: κολλημένη μπάρα με τιμή + κουμπί, όσο το κανονικό κουμπί είναι εκτός οθόνης */}
+      <div
+        className={`fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 px-5 pt-3 backdrop-blur transition-transform duration-300 ease-out md:hidden ${
+          actionVisible ? "translate-y-full" : "translate-y-0"
+        }`}
+        style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
+        aria-hidden={actionVisible}
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex min-w-0 flex-col">
+            <span className="text-lg font-semibold text-ember">
+              {unit ? `${(unit * (pricing ? qtyNum : 1)).toFixed(2)} €` : ""}
+            </span>
+            <span className="truncate text-[11.5px] text-wood">
+              {!canAdd && firstProblem ? firstProblem : pricing && unit ? `${qtyNum} × ${unit.toFixed(2)} €` : "Φτιάχνεται ειδικά για σένα"}
+            </span>
+          </div>
+          <button
+            type="button"
+            tabIndex={actionVisible ? -1 : 0}
+            onClick={(e) => onStickyClick(e.currentTarget)}
+            className="shrink-0 bg-ink px-6 py-3 text-sm font-medium text-paper active:bg-ember"
+          >
+            {uploading ? "Ανεβαίνει…" : canAdd ? "Στο καλάθι" : "Συνέχισε"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

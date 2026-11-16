@@ -1,47 +1,53 @@
-import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { listPrice, type Pricing } from "@/lib/pricing";
+import ProductBrowser, { type BrowserProduct } from "@/components/ProductBrowser";
 
 // Οι αλλαγές από το admin εμφανίζονται στο site μέσα σε ~1 λεπτό, χωρίς νέο deploy.
 export const revalidate = 60;
 
-type Product = {
-  id: string;
-  name: string;
-  slug: string;
-  material: string | null;
-  base_price: string | null;
-  images: string[] | null;
-  pricing: Pricing | null;
+export const metadata: Metadata = {
+  title: "Όλα τα προϊόντα — Charaxis",
+  description:
+    "Ξύλινα μπρελόκ με όνομα, χαραγμένες φωτογραφίες, ρολόγια, ταμπέλες και στολίδια με laser χάραξη. Φτιαγμένα ένα-ένα, με το δικό σου κείμενο ή φωτογραφία.",
+  alternates: { canonical: "/proionta" },
 };
 
-async function getProducts(): Promise<Product[]> {
+async function getData() {
   try {
-    const { data, error } = await supabase
-      .from("products")
-      .select("id, name, slug, material, base_price, images, pricing")
-      .eq("active", true)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false });
-
-    if (error || !data) return [];
-    return data as Product[];
+    const [prods, cats] = await Promise.all([
+      supabase
+        .from("products")
+        .select("id, name, slug, base_price, images, pricing, category_id")
+        .eq("active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false }),
+      supabase.from("categories").select("id, name, slug").eq("active", true).order("sort_order", { ascending: true }),
+    ]);
+    return {
+      products: (prods.data ?? []) as BrowserProduct[],
+      categories: (cats.data ?? []) as { id: string; name: string; slug: string }[],
+    };
   } catch {
-    return [];
+    return { products: [], categories: [] };
   }
 }
 
 export default async function ProductsPage() {
-  const products = await getProducts();
+  const { products, categories } = await getData();
 
   return (
     <main className="flex flex-col overflow-x-hidden">
       <Header />
-      <section className="flex flex-col gap-9 px-6 py-12 md:px-16 md:py-16">
-        <h1 className="text-[28px] font-medium md:text-[34px]">Όλα τα προϊόντα</h1>
+      <section className="flex flex-col gap-8 px-6 py-12 md:px-16 md:py-16">
+        <div className="flex flex-col gap-3">
+          <h1 className="text-[28px] font-medium md:text-[34px]">Όλα τα προϊόντα</h1>
+          <p className="max-w-xl font-serif text-wood">
+            Κάθε κομμάτι χαράζεται με laser στο εργαστήριό μας, με το δικό σου κείμενο ή τη δική σου φωτογραφία.
+          </p>
+        </div>
 
         {products.length === 0 ? (
           <p className="font-serif text-wood">
@@ -52,36 +58,7 @@ export default async function ProductsPage() {
             για κάτι συγκεκριμένο.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            {products.map((p) => {
-              const img = p.images && p.images.length > 0 ? p.images[0] : null;
-              return (
-                <Link key={p.id} href={`/proionta/${p.slug}`} className="group flex flex-col gap-2.5">
-                  <div className="relative h-[200px] overflow-hidden rounded-sm border border-line after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-ember after:transition-transform after:duration-500 group-hover:after:scale-x-100">
-                    {img ? (
-                      <Image
-                        src={img}
-                        alt={p.name}
-                        fill
-                        sizes="(min-width: 768px) 25vw, 50vw"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="placeholder-tile h-full">
-                        <span className="inline-block">Φωτογραφία προϊόντος</span>
-                      </div>
-                    )}
-                  </div>
-                  <h3 className="text-[15px] font-medium leading-snug transition-colors duration-200 group-hover:text-ember">
-                    {p.name}
-                  </h3>
-                  <div className="text-[15px] text-wood">
-                    {listPrice(p.base_price, p.pricing)}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          <ProductBrowser products={products} categories={categories} />
         )}
       </section>
       <Footer />

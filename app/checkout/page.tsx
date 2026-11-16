@@ -18,7 +18,22 @@ const STRIPE_ENABLED = process.env.NEXT_PUBLIC_STRIPE_ENABLED === "true";
 const IRIS_ENABLED = process.env.NEXT_PUBLIC_IRIS_ENABLED === "true";
 
 const input =
-  "w-full border border-line bg-paper px-4 py-3 text-sm outline-none transition-colors duration-200 focus:border-ink";
+  "w-full border border-line bg-paper px-4 py-3 text-[16px] outline-none transition-colors duration-200 focus:border-ink md:text-sm";
+
+// Τα στοιχεία του πελάτη μένουν μόνο στον δικό του browser, για την επόμενη παραγγελία.
+const SAVED_KEY = "charaxis_customer_v1";
+type Saved = { name: string; email: string; phone: string; method: string; address: string; city: string; postcode: string };
+
+// Μετατρέπει τεχνικά μηνύματα της βάσης σε κάτι κατανοητό για τον πελάτη.
+function friendlyError(msg: string | undefined): string {
+  if (!msg) return "Κάτι πήγε στραβά. Δοκίμασε ξανά σε λίγο.";
+  if (/fetch|network|Failed to fetch/i.test(msg)) return "Δεν υπάρχει σύνδεση. Έλεγξε το internet σου και δοκίμασε ξανά.";
+  if (/email/i.test(msg)) return "Έλεγξε ότι το email είναι σωστό.";
+  if (/phone|τηλ/i.test(msg)) return "Έλεγξε ότι το τηλέφωνο είναι σωστό.";
+  if (/coupon|κουπ/i.test(msg)) return "Το κουπόνι δεν ισχύει πια. Αφαίρεσέ το και δοκίμασε ξανά.";
+  if (/product|προϊ/i.test(msg)) return "Κάποιο προϊόν του καλαθιού δεν είναι πλέον διαθέσιμο. Έλεγξε το καλάθι σου.";
+  return msg;
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -39,8 +54,45 @@ export default function CheckoutPage() {
   const [shipCost, setShipCost] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [remember, setRemember] = useState(true);
+  const [methodCosts, setMethodCosts] = useState<Record<string, number>>({});
 
   const pickup = method !== "acs";
+
+  // Συμπλήρωση από την προηγούμενη παραγγελία (αν ο πελάτης το επέλεξε τότε).
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(SAVED_KEY);
+      if (!raw) return;
+      const s = JSON.parse(raw) as Partial<Saved>;
+      if (s.name) setName(s.name);
+      if (s.email) setEmail(s.email);
+      if (s.phone) setPhone(s.phone);
+      if (s.method && METHODS.some((m) => m.code === s.method)) setMethod(s.method);
+      if (s.address) setAddress(s.address);
+      if (s.city) setCity(s.city);
+      if (s.postcode) setPostcode(s.postcode);
+    } catch {}
+  }, []);
+
+  // Κόστος κάθε τρόπου αποστολής, για να φαίνεται δίπλα στην επιλογή.
+  useEffect(() => {
+    let cancelled = false;
+    const pc = postcode.replace(/\s/g, "");
+    const t = setTimeout(async () => {
+      const entries = await Promise.all(
+        METHODS.map(async (m) => {
+          const { data } = await supabase.rpc("quote_shipping", { p_method: m.code, p_postcode: pc });
+          return [m.code, data == null ? NaN : Number(data)] as const;
+        })
+      );
+      if (!cancelled) setMethodCosts(Object.fromEntries(entries.filter(([, v]) => !Number.isNaN(v))));
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [postcode]);
 
   // Ζωντανό μεταφορικό (ο ΤΚ μπορεί να το ανεβάσει στα 5€ για δυσπρόσιτες περιοχές).
   useEffect(() => {
@@ -105,10 +157,19 @@ export default function CheckoutPage() {
     });
     if (err || !data) {
       setBusy(false);
-      setError(err?.message || "Κάτι πήγε στραβά. Δοκίμασε ξανά.");
+      setError(friendlyError(err?.message));
       return;
     }
     const orderId = (data as { order_id: string }).order_id;
+
+    try {
+      if (remember) {
+        const s: Saved = { name: name.trim(), email: email.trim(), phone: phone.trim(), method, address: address.trim(), city: city.trim(), postcode: postcode.replace(/\s/g, "") };
+        localStorage.setItem(SAVED_KEY, JSON.stringify(s));
+      } else {
+        localStorage.removeItem(SAVED_KEY);
+      }
+    } catch {}
 
     if (payment === "stripe") {
       try {
@@ -183,6 +244,9 @@ export default function CheckoutPage() {
                     <span className="block text-[13px] text-wood">{m.note}</span>
                   </span>
                 </span>
+                {methodCosts[m.code] != null && (
+                  <span className="shrink-0 font-medium">{methodCosts[m.code].toFixed(2)} €</span>
+                )}
               </label>
             ))}
           </fieldset>
@@ -238,14 +302,28 @@ export default function CheckoutPage() {
           </fieldset>
 
           <textarea className={input} rows={3} placeholder="Σημειώσεις για την παραγγελία (προαιρετικό)" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} />
+
+          <label className="-mt-4 flex cursor-pointer items-center gap-3 text-sm text-wood">
+            <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 accent-[#1B1714]" />
+            Θυμήσου τα στοιχεία μου σε αυτή τη συσκευή για την επόμενη παραγγελία
+          </label>
         </div>
 
         <aside className="flex h-fit flex-col gap-5 border border-line p-6 lg:sticky lg:top-24">
           <h2 className="font-medium">Σύνοψη</h2>
-          <ul className="flex flex-col gap-2 text-sm">
+          <ul className="flex flex-col gap-3 text-sm">
             {items.map((i) => (
-              <li key={i.key} className="flex justify-between gap-3">
-                <span className="min-w-0 break-words">{i.quantity} × {i.name}</span>
+              <li key={i.key} className="flex items-center gap-3">
+                <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-sm border border-line bg-line/40">
+                  {i.image && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={i.image} alt="" className="h-full w-full object-cover" />
+                  )}
+                  <span className="absolute -right-0 -top-0 flex h-5 min-w-5 items-center justify-center rounded-bl-sm bg-ink px-1 text-[10.5px] font-semibold text-paper">
+                    {i.quantity}
+                  </span>
+                </span>
+                <span className="min-w-0 flex-1 break-words leading-snug">{i.name}</span>
                 <span className="shrink-0">{(i.price * i.quantity).toFixed(2)} €</span>
               </li>
             ))}

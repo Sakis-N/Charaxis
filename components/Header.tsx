@@ -175,6 +175,13 @@ export default function Header() {
               id="cart-button"
               href="/kalathi"
               aria-label="Καλάθι"
+              onClick={(e) => {
+                // Με προϊόντα στο καλάθι ανοίγει το πλαϊνό συρτάρι· αλλιώς η σελίδα καλαθιού.
+                if (count > 0 && !e.metaKey && !e.ctrlKey) {
+                  e.preventDefault();
+                  window.dispatchEvent(new CustomEvent("cart:open"));
+                }
+              }}
               className={`flex items-center gap-2 border px-4 py-2 text-sm font-medium transition-all duration-200 hover:border-ember hover:text-ember md:px-4 md:py-2.5 ${
                 bump ? "scale-110 border-ember text-ember" : "border-ink"
               }`}
