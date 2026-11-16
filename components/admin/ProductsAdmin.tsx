@@ -35,8 +35,20 @@ type Product = {
 type PricingEd = { min_qty: string[]; variants: Record<string, { label: string; prices: string[] }> };
 type Category = { id: string; name: string; slug: string; description: string | null; sort_order: number; active: boolean };
 
-const btn = "border border-ink px-3 py-1.5 text-sm transition-colors hover:border-ember hover:text-ember disabled:opacity-40";
-const field = "w-full border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-ink";
+const btn =
+  "inline-flex items-center justify-center gap-1.5 rounded-full border border-line px-3.5 py-1.5 text-[13px] font-medium transition-colors hover:border-ink disabled:opacity-40";
+const field = "w-full rounded-lg border border-line bg-paper px-3 py-2 text-[14px] outline-none focus:border-ink";
+
+// Έτοιμα πεδία με ένα κλικ, για να μη γράφεις κάθε φορά τα ίδια.
+const PRESETS: { l: string; f: CF }[] = [
+  { l: "Όνομα", f: { id: "", type: "text", label: "Όνομα", placeholder: "π.χ. Μαρία" } },
+  { l: "Ημερομηνία", f: { id: "", type: "text", label: "Ημερομηνία", placeholder: "π.χ. 19/07/2025" } },
+  { l: "Κείμενο", f: { id: "", type: "textarea", label: "Κείμενο για χάραξη", placeholder: "Γράψε το κείμενο όπως το θέλεις" } },
+  { l: "Φωτογραφία", f: { id: "", type: "photo", label: "Η φωτογραφία σου", description: "Καθαρή φωτογραφία, όσο πιο φωτεινή γίνεται." } },
+  { l: "Λογότυπο", f: { id: "", type: "photo", label: "Το λογότυπό σου", description: "PNG, SVG ή PDF αν έχεις." } },
+  { l: "Χρώμα/Επιλογή", f: { id: "", type: "select", label: "Χρώμα", options: ["Φυσικό ξύλο", "Σκούρο ξύλο"] } },
+  { l: "Σχόλια", f: { id: "notes", type: "textarea", label: "Σχόλια ή οδηγίες (προαιρετικά)", placeholder: "π.χ. θέλω τα γράμματα στα αγγλικά" } },
+];
 const TYPES: Record<CF["type"], string> = {
   text: "Μικρό κείμενο",
   textarea: "Μεγάλο κείμενο",
@@ -180,10 +192,13 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
   }
 
   return (
-    <div className="flex flex-col gap-5 border border-ink p-4 text-sm">
-      <div className="flex items-center justify-between">
-        <b className="text-base">{isNew ? "Νέο προϊόν" : "Επεξεργασία προϊόντος"}</b>
-        <button className={btn} onClick={onDone}>Κλείσιμο</button>
+    <div className="flex flex-col gap-5 rounded-2xl border border-line bg-paper p-4 text-sm md:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <b className="text-[18px]">{isNew ? (initial.name ? "Αντίγραφο προϊόντος" : "Νέο προϊόν") : "Επεξεργασία προϊόντος"}</b>
+        <div className="flex gap-2">
+          {!isNew && p.slug && <a className={btn} href={`/proionta/${p.slug}`} target="_blank" rel="noreferrer">Δες στο site ↗</a>}
+          <button className={btn} onClick={onDone}>← Πίσω</button>
+        </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
@@ -212,8 +227,15 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
         <label className="flex items-center gap-2">Σειρά <input className={`${field} w-20`} type="number" value={p.sort_order} onChange={(e) => set("sort_order", Number(e.target.value))} /></label>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <b>Φωτογραφίες (η πρώτη είναι η κύρια · 2–5 προτείνονται)</b>
+      <div
+        className="flex flex-col gap-2 rounded-xl border-2 border-dashed border-line p-3"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          upload(e.dataTransfer.files);
+        }}
+      >
+        <b>Φωτογραφίες <span className="font-normal text-wood">(η πρώτη είναι η κύρια · 2–5 προτείνονται · σύρε τες εδώ)</span></b>
         <div className="flex flex-wrap gap-3">
           {p.images.map((u, i) => (
             <div key={u} className="flex flex-col gap-1">
@@ -227,10 +249,17 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
             </div>
           ))}
         </div>
-        <label className={`${btn} w-fit cursor-pointer`}>
-          <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => { upload(e.target.files); e.target.value = ""; }} />
-          {busy ? "Περίμενε…" : "+ Ανέβασμα φωτογραφιών"}
-        </label>
+        <div className="flex flex-wrap gap-2">
+          <label className={`${btn} w-fit cursor-pointer`}>
+            <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => { upload(e.target.files); e.target.value = ""; }} />
+            {busy ? "Περίμενε…" : "+ Ανέβασμα φωτογραφιών"}
+          </label>
+          <label className={`${btn} w-fit cursor-pointer md:hidden`}>
+            <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { upload(e.target.files); e.target.value = ""; }} />
+            📷 Τράβηξε τώρα
+          </label>
+        </div>
+        <span className="text-[12px] text-faint">Μικραίνουν αυτόματα πριν ανέβουν, για γρήγορο site.</span>
       </div>
 
       {pr && (
@@ -317,12 +346,20 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
               )}
             </div>
           ))}
-          <button className={`${btn} w-fit`} onClick={() => set("custom_fields", [...p.custom_fields, { id: "", type: "text", label: "" }])}>+ Προσθήκη πεδίου</button>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[12.5px] text-wood">Γρήγορη προσθήκη:</span>
+            {PRESETS.map((pr) => (
+              <button key={pr.l} className={btn} onClick={() => set("custom_fields", [...p.custom_fields, { ...pr.f }])}>+ {pr.l}</button>
+            ))}
+            <button className={btn} onClick={() => set("custom_fields", [...p.custom_fields, { id: "", type: "text", label: "" }])}>+ Κενό πεδίο</button>
+          </div>
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-line pt-4">
-        <button className="bg-ink px-5 py-2 text-paper hover:bg-ember disabled:opacity-40" disabled={busy} onClick={save}>Αποθήκευση</button>
+      <div className="sticky bottom-16 z-10 -mx-4 flex flex-wrap items-center gap-3 border-t border-line bg-paper/95 px-4 py-3 backdrop-blur md:bottom-0 md:-mx-6 md:px-6">
+        <button className="rounded-full bg-ink px-6 py-2.5 text-[14px] font-semibold text-paper hover:bg-ember disabled:opacity-40" disabled={busy} onClick={save}>
+          {busy ? "Περίμενε…" : "Αποθήκευση"}
+        </button>
         {!isNew && <button className={btn} disabled={busy} onClick={remove}>Διαγραφή</button>}
         {msg && <span className="text-ember-dark">{msg}</span>}
       </div>
@@ -359,10 +396,23 @@ function Categories({ cats, reload }: { cats: Category[]; reload: () => void }) 
   );
 }
 
-export default function ProductsAdmin() {
+export default function ProductsAdmin({ startNew = 0, onConsumed }: { startNew?: number; onConsumed?: () => void }) {
   const [rows, setRows] = useState<(Product & { id: string })[] | null>(null);
   const [cats, setCats] = useState<Category[]>([]);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [q, setQ] = useState("");
+
+  // Από το «Σήμερα» → «+ Νέο προϊόν» ανοίγει κατευθείαν η φόρμα.
+  useEffect(() => {
+    if (startNew > 0) {
+      setEditing(empty());
+      onConsumed?.();
+    }
+  }, [startNew, onConsumed]);
+
+  // Αντίγραφο: ίδιες ρυθμίσεις/πεδία/φωτογραφίες, νέο όνομα, ανενεργό μέχρι να το ελέγξεις.
+  const duplicate = (p: Product) =>
+    setEditing({ ...p, id: undefined, name: `${p.name} (αντίγραφο)`, slug: `${p.slug}-2`, active: false });
 
   const load = useCallback(async () => {
     const [{ data: pr }, { data: ct }] = await Promise.all([
@@ -385,27 +435,44 @@ export default function ProductsAdmin() {
   if (editing) return <Editor initial={editing} cats={cats} onDone={() => { setEditing(null); load(); }} />;
   if (!rows) return <p className="text-wood">Φόρτωση…</p>;
 
+  const nq = q.trim().toLowerCase();
+  const shown = rows.filter((p) => !nq || p.name.toLowerCase().includes(nq));
+
   return (
     <div className="flex flex-col gap-5">
-      <div><button className="bg-ink px-5 py-2 text-sm text-paper hover:bg-ember" onClick={() => setEditing(empty())}>+ Νέο προϊόν</button></div>
-      <div className="flex flex-col divide-y divide-line border-y border-line text-sm">
-        {rows.map((p) => (
-          <div key={p.id} className="flex flex-wrap items-center gap-3 py-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {p.images[0] ? <img src={p.images[0]} alt="" className="h-12 w-12 border border-line object-cover" /> : <div className="h-12 w-12 border border-line" />}
-            <div className="min-w-0 flex-1">
-              <div className="font-medium">{p.name}</div>
-              <div className="text-wood">{Number(p.base_price).toFixed(2)} € · {cats.find((c) => c.id === p.category_id)?.name ?? "χωρίς κατηγορία"}</div>
-            </div>
-            <span className={p.active ? "text-green-700" : "text-faint"}>{p.active ? "Ενεργό" : "Ανενεργό"}</span>
-            <button className={btn} onClick={async () => { await supabase.from("products").update({ active: !p.active }).eq("id", p.id); load(); }}>
-              {p.active ? "Απόκρυψη" : "Εμφάνιση"}
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <button className="w-fit rounded-full bg-ink px-5 py-2.5 text-[14px] font-semibold text-paper hover:bg-ember" onClick={() => setEditing(empty())}>
+          + Νέο προϊόν
+        </button>
+        <input className={`${field} md:w-72`} placeholder="Αναζήτηση προϊόντος" value={q} onChange={(e) => setQ(e.target.value)} />
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {shown.map((p) => (
+          <div key={p.id} className={`flex gap-3 rounded-xl border border-line bg-paper p-3 text-[14px] ${p.active ? "" : "opacity-60"}`}>
+            <button onClick={() => setEditing(p)} className="shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {p.images[0] ? <img src={p.images[0]} alt="" className="h-20 w-20 rounded-lg border border-line object-cover" /> : <div className="h-20 w-20 rounded-lg border border-line bg-line/40" />}
             </button>
-            <button className={btn} onClick={() => setEditing(p)}>Επεξεργασία</button>
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <button onClick={() => setEditing(p)} className="line-clamp-2 text-left font-semibold leading-snug hover:text-ember">{p.name}</button>
+              <div className="text-[12.5px] text-wood">
+                {p.pricing ? `από ${minPrice(p.pricing).toFixed(2)} €` : `${Number(p.base_price).toFixed(2)} €`} · {cats.find((c) => c.id === p.category_id)?.name ?? "χωρίς κατηγορία"}
+              </div>
+              <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
+                <button className={`${btn} px-2.5 py-1 text-[12px]`} onClick={async () => { await supabase.from("products").update({ active: !p.active }).eq("id", p.id); load(); }}>
+                  {p.active ? "● Ενεργό" : "○ Κρυφό"}
+                </button>
+                <button className={`${btn} px-2.5 py-1 text-[12px]`} onClick={() => duplicate(p)}>Αντίγραφο</button>
+                <a className={`${btn} px-2.5 py-1 text-[12px]`} href={`/proionta/${p.slug}`} target="_blank" rel="noreferrer">↗</a>
+              </div>
+            </div>
           </div>
         ))}
-        {rows.length === 0 && <p className="py-4 font-serif text-wood">Κανένα προϊόν ακόμα.</p>}
       </div>
+      {rows.length === 0 && <p className="py-4 font-serif text-wood">Κανένα προϊόν ακόμα.</p>}
+      <p className="text-[12.5px] text-faint">
+        Συμβουλή: για νέο προϊόν παρόμοιο με κάποιο υπάρχον, πάτα «Αντίγραφο». Κρατάει πεδία, τιμές και φωτογραφίες, και μένει κρυφό μέχρι να το ενεργοποιήσεις.
+      </p>
       <Categories cats={cats} reload={load} />
     </div>
   );
