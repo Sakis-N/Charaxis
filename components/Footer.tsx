@@ -59,6 +59,14 @@ export default function Footer() {
               Δες τη δουλειά μας στο Instagram
             </a>
           )}
+          {BUSINESS.tiktok && (
+            <a href={BUSINESS.tiktok} target="_blank" rel="noreferrer" className="flex w-fit items-center gap-2 rounded-full border border-paper/20 px-4 py-2 text-[13px] transition-colors hover:border-ember hover:text-ember">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M16.6 3c.3 2.3 1.7 3.9 4 4.1v3.1c-1.5.1-2.9-.4-4-1.1v6.2c0 3.2-2.4 5.7-5.6 5.7A5.6 5.6 0 015.4 15.3c0-3.3 2.8-5.9 6.2-5.6v3.2c-1.5-.4-3 .6-3 2.4 0 1.4 1.1 2.5 2.5 2.5 1.5 0 2.5-1 2.5-2.6V3h2.9z" />
+              </svg>
+              Ακολούθησέ μας στο TikTok
+            </a>
+          )}
         </div>
 
         <div className="flex flex-col gap-3 text-[14px]">

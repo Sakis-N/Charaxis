@@ -11,7 +11,8 @@ export const BUSINESS = {
   afm: env(process.env.NEXT_PUBLIC_BUSINESS_AFM),
   doy: env(process.env.NEXT_PUBLIC_BUSINESS_DOY),
   address: env(process.env.NEXT_PUBLIC_BUSINESS_ADDRESS),
-  instagram: env(process.env.NEXT_PUBLIC_INSTAGRAM),
+  instagram: env(process.env.NEXT_PUBLIC_INSTAGRAM) ?? "https://www.instagram.com/charaxis25/",
+  tiktok: env(process.env.NEXT_PUBLIC_TIKTOK) ?? "https://www.tiktok.com/@charaxis25",
   facebook: env(process.env.NEXT_PUBLIC_FACEBOOK),
 };
 

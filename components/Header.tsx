@@ -57,6 +57,12 @@ const CartIcon = () => (
   </svg>
 );
 
+const TikTokIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M16.6 3c.3 2.3 1.7 3.9 4 4.1v3.1c-1.5.1-2.9-.4-4-1.1v6.2c0 3.2-2.4 5.7-5.6 5.7A5.6 5.6 0 015.4 15.3c0-3.3 2.8-5.9 6.2-5.6v3.2c-1.5-.4-3 .6-3 2.4 0 1.4 1.1 2.5 2.5 2.5 1.5 0 2.5-1 2.5-2.6V3h2.9z" />
+  </svg>
+);
+
 const InstaIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" strokeWidth="1.6" />
@@ -259,6 +265,17 @@ export default function Header() {
                 <InstaIcon />
               </a>
             )}
+            {BUSINESS.tiktok && (
+              <a
+                href={BUSINESS.tiktok}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="TikTok"
+                className="hidden h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-line/50 hover:text-ember lg:flex"
+              >
+                <TikTokIcon />
+              </a>
+            )}
             <Link
               id="cart-button"
               href="/kalathi"
@@ -385,6 +402,11 @@ export default function Header() {
               {BUSINESS.instagram && (
                 <a href={BUSINESS.instagram} target="_blank" rel="noreferrer" aria-label="Instagram" className="text-ink">
                   <InstaIcon />
+                </a>
+              )}
+              {BUSINESS.tiktok && (
+                <a href={BUSINESS.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok" className="text-ink">
+                  <TikTokIcon />
                 </a>
               )}
             </div>
