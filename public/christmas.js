@@ -1,4 +1,4 @@
-/* e-charaxis — Χριστουγεννιάτικο εφέ: λαμπάκια, χιονονιφάδες-κρύσταλλοι, απαλά κουδουνάκια.
+/* e-charaxis — Χριστουγεννιάτικο εφέ: λαμπάκια, χιονονιφάδες-κρύσταλλοι, Jingle Bells με κουδουνάκια (με το κουμπί 🔔).
    Ανεξάρτητο αρχείο, χωρίς εξαρτήσεις. Μπαίνει με ένα <Script src="/christmas.js">. */
 (function () {
   if (typeof window === "undefined" || window.__xmasFx) return;
@@ -30,8 +30,10 @@
     text-align:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);backdrop-filter:blur(4px);padding:0;
     transition:transform .2s}
   .xm-btn:hover{transform:scale(1.08)}
-  .xm-btn.off{background:rgba(60,60,60,.8)}
-  @media (prefers-reduced-motion: reduce){.xm-bulb{animation:none}}
+  .xm-btn.playing{background:rgba(24,112,52,.92)}
+  .xm-btn.idle{animation:xm-pulse 2.4s ease-in-out infinite}
+  @keyframes xm-pulse{0%,100%{box-shadow:0 4px 14px rgba(0,0,0,.25),0 0 0 0 rgba(160,20,30,.35)}50%{box-shadow:0 4px 14px rgba(0,0,0,.25),0 0 0 9px rgba(160,20,30,0)}}
+  @media (prefers-reduced-motion: reduce){.xm-bulb,.xm-btn.idle{animation:none}}
   `;
   var st = document.createElement("style");
   st.textContent = css;
@@ -192,13 +194,27 @@
   }
   requestAnimationFrame(frame);
 
-  /* ---------- Απαλά κουδουνάκια (Web Audio, χωρίς αρχείο ήχου) ---------- */
+  /* ---------- Jingle Bells με απαλά κουδουνάκια (Web Audio, χωρίς αρχείο ήχου) ---------- */
   var AC = window.AudioContext || window.webkitAudioContext;
-  var actx = null, master = null;
-  var soundOn = store.get("xmasSound") !== "off";
-  var VOLUME = 0.10;          // απαλή ένταση
-  var EVERY_MS = 22000;       // κάθε πόσο ακούγονται
+  var actx = null, master = null, lp = null;
+  var playing = false, loopT = null;
+  var VOLUME = 0.14;          // απαλή ένταση
+  var PAUSE_S = 9;            // παύση ανάμεσα στις επαναλήψεις του τραγουδιού
+  var Q = 0.34;               // διάρκεια τετάρτου (δευτερόλεπτα)
 
+  // Η μελωδία του «Jingle Bells» (κοινό κτήμα), σε ντο μείζονα: [νότα, διάρκεια σε τέταρτα]
+  var NOTE = { C: 523.25, D: 587.33, E: 659.26, F: 698.46, G: 783.99 };
+  var SONG = [
+    ["E",1],["E",1],["E",2],  ["E",1],["E",1],["E",2],  ["E",1],["G",1],["C",1.5],["D",0.5],["E",4],
+    ["F",1],["F",1],["F",1.5],["F",0.5],  ["F",1],["E",1],["E",1],["E",0.5],["E",0.5],
+    ["G",1],["G",1],["F",1],["D",1],  ["C",4]
+  ];
+
+  function buildGraph() {
+    master = actx.createGain();
+    master.gain.value = VOLUME;
+    master.connect(lp);
+  }
   function bell(t, pitch, gain) {
     var partials = [[1, 1], [2.76, 0.45], [5.4, 0.25], [8.93, 0.12]];
     partials.forEach(function (p) {
@@ -212,53 +228,57 @@
       o.start(t); o.stop(t + 1.3);
     });
   }
-  function jingle() {
-    if (!actx || !soundOn || document.hidden || isAdmin()) return;
-    var t = actx.currentTime + 0.05;
-    for (var burst = 0; burst < 2; burst++) {
-      for (var i = 0; i < 7; i++) {
-        bell(t + burst * 0.75 + i * 0.07 + Math.random() * 0.03, 1500 + Math.random() * 900, 0.5 + Math.random() * 0.5);
-      }
+  // Προγραμματίζει όλο το τραγούδι και επιστρέφει τη διάρκειά του σε δευτερόλεπτα.
+  function playSong() {
+    var t = actx.currentTime + 0.08, beats = 0;
+    SONG.forEach(function (n) {
+      bell(t + beats * Q, NOTE[n[0]], n[1] >= 4 ? 0.85 : 0.7);
+      beats += n[1];
+    });
+    return beats * Q;
+  }
+  function loop() {
+    if (!playing) return;
+    var dur = 0;
+    if (!document.hidden && !isAdmin()) dur = playSong();
+    loopT = setTimeout(loop, (dur + PAUSE_S) * 1000);
+  }
+  function startMusic() {
+    if (!AC) return;
+    if (!actx) {
+      actx = new AC();
+      lp = actx.createBiquadFilter();
+      lp.type = "lowpass"; lp.frequency.value = 7000;
+      lp.connect(actx.destination);
+      buildGraph();
     }
-    [0, 0.28, 0.56].forEach(function (d, k) { bell(t + 1.7 + d, 1318.5, k === 2 ? 0.9 : 0.7); });
+    if (actx.state === "suspended") actx.resume();
+    playing = true;
+    paintBtn();
+    loop();
   }
-  function startAudio() {
-    if (!AC || actx) return;
-    actx = new AC();
-    master = actx.createGain();
-    master.gain.value = VOLUME;
-    var lp = actx.createBiquadFilter();
-    lp.type = "lowpass"; lp.frequency.value = 7000;
-    master.connect(lp); lp.connect(actx.destination);
-    if (soundOn) setTimeout(jingle, 600);
-    setInterval(jingle, EVERY_MS);
+  function stopMusic() {
+    playing = false;
+    clearTimeout(loopT);
+    // Κόβουμε αμέσως ό,τι έχει ήδη προγραμματιστεί: αποσυνδέουμε το παλιό master.
+    if (master) { try { master.disconnect(); } catch (e) {} buildGraph(); }
+    paintBtn();
   }
-  // Οι browsers δεν επιτρέπουν ήχο πριν αλληλεπιδράσει ο επισκέπτης: ξεκινάμε στο πρώτο κλικ/άγγιγμα/πλήκτρο.
-  ["pointerdown", "keydown", "touchstart"].forEach(function (ev) {
-    window.addEventListener(ev, function once() {
-      startAudio();
-      if (actx && actx.state === "suspended") actx.resume();
-      window.removeEventListener(ev, once);
-    }, { passive: true });
-  });
 
-  /* ---------- Κουμπί ήχου ---------- */
+  /* ---------- Κουμπί: πάτα την καμπάνα για να παίξει το τραγούδι ---------- */
   var btn = document.createElement("button");
   btn.type = "button";
   btn.className = "xm-btn";
   function paintBtn() {
-    btn.textContent = soundOn ? "🔔" : "🔕";
-    btn.classList.toggle("off", !soundOn);
-    btn.setAttribute("aria-label", soundOn ? "Σίγαση κουδουνιών" : "Ενεργοποίηση κουδουνιών");
+    btn.textContent = playing ? "🎶" : "🔔";
+    btn.classList.toggle("playing", playing);
+    btn.classList.toggle("idle", !playing);
+    btn.setAttribute("aria-label", playing ? "Σίγαση μουσικής" : "Παίξε Jingle Bells");
     btn.title = btn.getAttribute("aria-label");
   }
   btn.addEventListener("click", function (e) {
     e.stopPropagation();
-    soundOn = !soundOn;
-    store.set("xmasSound", soundOn ? "on" : "off");
-    paintBtn();
-    startAudio();
-    if (soundOn) jingle();
+    if (playing) stopMusic(); else startMusic();
   });
   paintBtn();
   document.body.appendChild(btn);
@@ -268,6 +288,7 @@
   function sync() {
     var hide = isAdmin();
     lights.style.display = cv.style.display = btn.style.display = hide ? "none" : "";
+    if (hide && playing) stopMusic();
     if (!hide) attachLights();
   }
   sync();
