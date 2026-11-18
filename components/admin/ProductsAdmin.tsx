@@ -14,6 +14,7 @@ type CF = {
   options?: string[];
   toggle_yes?: string;
   toggle_no?: string;
+  optional?: boolean;
 };
 type Product = {
   id?: string;
@@ -332,6 +333,12 @@ function Editor({ initial, cats, onDone }: { initial: Product; cats: Category[];
               <input className={field} placeholder="Επεξήγηση (προαιρετικό)" value={f.description ?? ""} onChange={(e) => setCF(i, { description: e.target.value })} />
               {(f.type === "text" || f.type === "textarea" || f.type === "toggle_text") && (
                 <input className={field} placeholder="Placeholder μέσα στο πεδίο (προαιρετικό)" value={f.placeholder ?? ""} onChange={(e) => setCF(i, { placeholder: e.target.value })} />
+              )}
+              {(f.type === "text" || f.type === "textarea" || f.type === "select" || f.type === "photo") && (
+                <label className="flex items-center gap-2 text-[13px] text-wood">
+                  <input type="checkbox" checked={Boolean(f.optional)} onChange={(e) => setCF(i, { optional: e.target.checked || undefined })} />
+                  Προαιρετικό (ο πελάτης μπορεί να το αφήσει κενό)
+                </label>
               )}
               {f.type === "select" && (
                 <textarea className={field} rows={2} placeholder="Επιλογές, μία ανά γραμμή" value={(f.options ?? []).join("\n")}

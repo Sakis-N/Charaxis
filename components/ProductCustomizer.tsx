@@ -36,6 +36,9 @@ type Props = {
 type Values = Record<string, string | boolean>;
 
 // Πεδία που είναι οδηγίες προς εμάς και όχι κείμενο προς χάραξη.
+// Υποχρεωτικά είναι τα πεδία κειμένου, επιλογής και φωτογραφίας, εκτός αν είναι σημειωμένα ως προαιρετικά (ή είναι σχόλια).
+const isRequiredField = (f: CustomField) =>
+  ["text", "textarea", "select", "photo"].includes(f.type) && !f.optional && !isNotesField(f) && !/προαιρετικ/i.test(f.label);
 const isNotesField = (f: CustomField) => /note|comment|sxoli|σχόλ|οδηγ/i.test(`${f.id} ${f.label}`);
 
 export default function ProductCustomizer({ productId, slug, image, productName, basePrice, fields, pricing }: Props) {
@@ -60,6 +63,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
   const [values, setValues] = useState<Values>({});
   const [qtyText, setQtyText] = useState("1");
   const [added, setAdded] = useState(false);
+  const [attempted, setAttempted] = useState(false);
 
   function setValue(id: string, v: string | boolean) {
     setValues((prev) => ({ ...prev, [id]: v }));
@@ -199,8 +203,27 @@ export default function ProductCustomizer({ productId, slug, image, productName,
   const blockedToggle = fields.find(
     (f) => f.type === "toggle_text" && values[f.id] === true && !String(values[`${f.id}_value`] || "").trim()
   );
-  const missingPhoto = fields.find((f) => f.type === "photo" && !f.optional && !photos[f.id]);
-  const canAdd = !blockedToggle && !uploading && !missingPhoto && !sideProblem && (!pricing || unit !== null);
+  const isEmpty = (f: CustomField) =>
+    f.type === "photo" ? !photos[f.id] : !String(values[f.id] ?? "").trim();
+  const missingFields = fields.filter((f) => isRequiredField(f) && isEmpty(f));
+  const missingPhoto = missingFields.find((f) => f.type === "photo");
+  const missingAny = missingFields[0];
+  const canAdd = !blockedToggle && !uploading && missingFields.length === 0 && !sideProblem && (!pricing || unit !== null);
+
+  // Πάτημα με ελλιπή πεδία: κόκκινη επισήμανση και μετακίνηση στο πρώτο που λείπει.
+  function tryAdd(btn: HTMLElement) {
+    if (canAdd) {
+      addToCart(btn);
+      return;
+    }
+    setAttempted(true);
+    const target = missingAny?.id ?? blockedToggle?.id ?? fields.find((f) => f.type === "side")?.id;
+    setTimeout(() => {
+      const el = target ? document.getElementById(`cf-${target}`) : null;
+      (el ?? rootRef.current)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 30);
+  }
+  const bad = (f: CustomField) => attempted && (missingFields.includes(f) || blockedToggle === f);
 
   // ---- Ζωντανή προεπισκόπηση: ό,τι γράφει/ανεβάζει ο πελάτης για χάραξη ----
   const previewLines: string[] = [];
@@ -231,14 +254,11 @@ export default function ProductCustomizer({ productId, slug, image, productName,
     (blockedToggle && `Συμπλήρωσε το πεδίο για «${blockedToggle.label}».`) ||
     sideProblem ||
     (missingPhoto && `Ανέβασε τη φωτογραφία «${missingPhoto.label}».`) ||
+    (missingAny && `Συμπλήρωσε «${missingAny.label.replace(/\s*\(προαιρετικά\)/i, "").trim()}».`) ||
     null;
 
   function onStickyClick(btn: HTMLElement) {
-    if (canAdd) {
-      addToCart(btn);
-      return;
-    }
-    rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    tryAdd(btn);
   }
 
   const choiceBtn = (active: boolean) =>
@@ -257,17 +277,25 @@ export default function ProductCustomizer({ productId, slug, image, productName,
       )}
 
       {fields.map((field, idx) => (
-        <div key={field.id} className="flex flex-col gap-3">
+        <div key={field.id} id={`cf-${field.id}`} className={`flex scroll-mt-28 flex-col gap-3 ${bad(field) ? "-m-3 rounded-md border border-red-500 bg-red-50/60 p-3" : ""}`}>
           <div className="flex items-center gap-2.5">
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-ink text-xs">
               {idx + 1}
             </span>
-            <span className="font-medium">{field.label}</span>
+            <span className="font-medium">
+              {field.label}
+              {isRequiredField(field) && <span className="ml-0.5 text-red-600" aria-hidden="true"> *</span>}
+            </span>
           </div>
           {field.description && (
             <p className="pl-[34px] font-serif text-sm text-wood">{field.description}</p>
           )}
 
+          {bad(field) && (
+            <p className="pl-[34px] text-sm font-medium text-red-600" role="alert">
+              {field.type === "photo" ? "Ανέβασε μια φωτογραφία για να συνεχίσεις." : field.type === "select" ? "Διάλεξε μία επιλογή για να συνεχίσεις." : "Συμπλήρωσε αυτό το πεδίο για να συνεχίσεις."}
+            </p>
+          )}
           <div className="pl-[34px]">
             {field.type === "text" && (
               <input
@@ -275,7 +303,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
                 value={(values[field.id] as string) || ""}
                 onChange={(e) => setValue(field.id, e.target.value)}
                 placeholder={field.placeholder}
-                className={inputCls}
+                className={`${inputCls} ${bad(field) ? "!border-red-500" : ""}`}
               />
             )}
 
@@ -285,7 +313,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
                 onChange={(e) => setValue(field.id, e.target.value)}
                 rows={4}
                 placeholder={field.placeholder}
-                className={`${inputCls} leading-relaxed`}
+                className={`${inputCls} leading-relaxed ${bad(field) ? "!border-red-500" : ""}`}
               />
             )}
 
@@ -535,8 +563,8 @@ export default function ProductCustomizer({ productId, slug, image, productName,
         </div>
         <button
           type="button"
-          disabled={!canAdd}
-          onClick={(e) => addToCart(e.currentTarget)}
+          disabled={uploading || (pricing ? unit === null : false)}
+          onClick={(e) => tryAdd(e.currentTarget)}
           className="bg-ink px-7 py-3 text-sm font-medium text-paper transition-colors duration-200 hover:bg-ember disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ink"
         >
           {uploading ? "Ανεβαίνει το αρχείο…" : added ? "Προστέθηκε ✓ — πρόσθεσε κι άλλο" : "Προσθήκη στο καλάθι"}
@@ -547,9 +575,9 @@ export default function ProductCustomizer({ productId, slug, image, productName,
           Συμπλήρωσε το πεδίο για «{blockedToggle.label}» για να συνεχίσεις.
         </p>
       )}
-      {sideProblem && !uploading && <p className="-mt-4 text-xs text-wood">{sideProblem}</p>}
-      {missingPhoto && !uploading && (
-        <p className="-mt-4 text-xs text-wood">Ανέβασε τη φωτογραφία «{missingPhoto.label}» για να προσθέσεις στο καλάθι.</p>
+      {sideProblem && !uploading && <p className={`-mt-4 text-xs ${attempted ? "font-medium text-red-600" : "text-wood"}`}>{sideProblem}</p>}
+      {attempted && !canAdd && !uploading && firstProblem && (
+        <p className="-mt-4 text-sm font-medium text-red-600" role="alert">{firstProblem}</p>
       )}
       {uploadError && <p className="-mt-4 text-xs text-ember-dark">{uploadError}</p>}
       {added && (
