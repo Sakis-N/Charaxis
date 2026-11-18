@@ -54,7 +54,8 @@ function intl(p: string | null | undefined) {
 }
 
 // Δημιουργεί αίτημα παράδοσης (voucher) και αποθηκεύει το parcel id.
-export async function createVoucher(orderId: string): Promise<{ parcelId: string }> {
+export async function createVoucher(orderId: string, sizeIn?: number): Promise<{ parcelId: string }> {
+  const size = [1, 2, 3].includes(Number(sizeIn)) ? Number(sizeIn) : SIZE;
   if (!boxnowConfigured) throw new Error("Το BoxNow δεν έχει ρυθμιστεί (λείπουν τα κλειδιά στο Netlify).");
   const o = await loadOrder(orderId);
   if (o.boxnow_parcel_id) return { parcelId: o.boxnow_parcel_id };
@@ -66,7 +67,7 @@ export async function createVoucher(orderId: string): Promise<{ parcelId: string
     name: String(it.product_name_snapshot || "Προϊόν").slice(0, 100),
     value: Number(it.line_total || 0).toFixed(2),
     weight: 0,
-    compartmentSize: SIZE,
+    compartmentSize: size,
   }));
   const body = {
     orderNumber: ref,
@@ -86,7 +87,7 @@ export async function createVoucher(orderId: string): Promise<{ parcelId: string
       contactName: o.customer_name,
       locationId: String(lockerId),
     },
-    items: items.length ? items : [{ id: `${ref}-1`, name: "Παραγγελία Charaxis", value: Number(o.total).toFixed(2), weight: 0, compartmentSize: SIZE }],
+    items: items.length ? items : [{ id: `${ref}-1`, name: "Παραγγελία Charaxis", value: Number(o.total).toFixed(2), weight: 0, compartmentSize: size }],
   };
   const t = await token();
   const r = await fetch(`${API}/api/v1/delivery-requests`, {

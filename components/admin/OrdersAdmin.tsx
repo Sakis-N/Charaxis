@@ -108,6 +108,7 @@ export function OrderCard({ o, reload, defaultOpen = false }: { o: Order; reload
   const [prodTime, setProdTime] = useState(o.production_time ?? "");
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [bnSize, setBnSize] = useState(1);
   const a = o.shipping_address || {};
   const phone = intlPhone(o.customer_phone);
   const link = typeof window !== "undefined" ? `${window.location.origin}/paraggelia/${o.id}` : `/paraggelia/${o.id}`;
@@ -128,7 +129,7 @@ export function OrderCard({ o, reload, defaultOpen = false }: { o: Order; reload
     const h = { Authorization: `Bearer ${ses.session?.access_token ?? ""}` };
     try {
       if (action === "create") {
-        const r = await fetch("/api/admin/boxnow", { method: "POST", headers: { ...h, "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id }) });
+        const r = await fetch("/api/admin/boxnow", { method: "POST", headers: { ...h, "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id, size: bnSize }) });
         const j = await r.json();
         setMsg(r.ok ? `Voucher BoxNow δημιουργήθηκε (${j.parcelId})` : "Σφάλμα BoxNow: " + (j.error || r.status));
         if (r.ok) reload();
@@ -275,7 +276,14 @@ export function OrderCard({ o, reload, defaultOpen = false }: { o: Order; reload
                   {o.boxnow_parcel_id ? (
                     <button className={btn} disabled={busy} onClick={() => boxnow("label")}>Άνοιγμα voucher (PDF)</button>
                   ) : (
-                    <button className={btnDark} disabled={busy || !a.locker_id} onClick={() => boxnow("create")}>Δημιουργία voucher BoxNow</button>
+                    <>
+                      <select className={field} value={bnSize} onChange={(e) => setBnSize(Number(e.target.value))} disabled={busy}>
+                        <option value={1}>Μικρή θυρίδα</option>
+                        <option value={2}>Μεσαία θυρίδα</option>
+                        <option value={3}>Μεγάλη θυρίδα</option>
+                      </select>
+                      <button className={btnDark} disabled={busy || !a.locker_id} onClick={() => boxnow("create")}>Δημιουργία voucher BoxNow</button>
+                    </>
                   )}
                   {!a.locker_id && <span className="text-wood">Δεν έχει επιλεγεί θυρίδα από χάρτη</span>}
                 </div>
