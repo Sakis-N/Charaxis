@@ -14,7 +14,7 @@ const IDEAS = [
     emoji: "👶",
     title: "Για νέο μωρό",
     text: "Ενθύμιο με όνομα, ώρα, βάρος και ύψος γέννησης. Το δώρο που κρατιέται μια ζωή.",
-    href: "/kategories/xaragmeni-fotografia",
+    href: "/kategories/gia-neo-moro",
     tone: "from-[#E3E6D3] to-[#CFD5B6]",
   },
   {
