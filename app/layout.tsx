@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Manrope, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart";
@@ -53,6 +54,8 @@ export default function RootLayout({
           <CartDrawer />
           <SearchOverlay />
         </CartProvider>
+        {/* Χριστουγεννιάτικο εφέ. Μετά τις γιορτές: σβήσε αυτή τη γραμμή. */}
+        <Script src="/christmas.js" strategy="afterInteractive" />
       </body>
     </html>
   );
