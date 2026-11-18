@@ -23,7 +23,7 @@ export default function PrivacyPage() {
 
       <h2>Με ποιους τα μοιραζόμαστε</h2>
       <ul>
-        <li>Εταιρείες courier (ACS, BoxNow, Skroutz Last Mile) — μόνο όσα χρειάζονται για την παράδοση.</li>
+        <li>Εταιρείες courier (ACS, BoxNow) — μόνο όσα χρειάζονται για την παράδοση.</li>
         <li>Stripe — για τις πληρωμές με κάρτα.</li>
         <li>Πάροχοι υποδομής που φιλοξενούν το site και τα δεδομένα (Netlify, Supabase) και αποστολής email (Resend).</li>
         <li>Λογιστής/φορολογικές αρχές, όπου απαιτείται από τον νόμο.</li>

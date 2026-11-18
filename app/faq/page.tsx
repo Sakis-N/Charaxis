@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
 import { DELIVERY_TIMES, PRODUCTION_TIME } from "@/lib/business";
+import { euroShort, freeShippingFrom } from "@/lib/freeShipping";
 
 export const metadata: Metadata = { title: "Συχνές ερωτήσεις — Charaxis" };
 
@@ -11,16 +12,22 @@ const faq: [string, React.ReactNode][] = [
   ["Θα δω το σχέδιο πριν χαραχτεί;", "Στα προϊόντα με κείμενο βλέπεις ζωντανή προεπισκόπηση της χάραξης στη σελίδα του προϊόντος. Αν έχεις αμφιβολία ή θες επιβεβαίωση, γράψε μας στις σημειώσεις της παραγγελίας."],
   ["Μπορώ να αλλάξω ή να ακυρώσω την παραγγελία;", "Ναι, αν δεν έχει ξεκινήσει η παραγωγή. Γράψε μας άμεσα με τον αριθμό παραγγελίας. Δες τις Επιστροφές & ακυρώσεις."],
   ["Δέχεστε αντικαταβολή;", "Όχι. Πληρώνεις με κάρτα ή τραπεζική κατάθεση."],
-  ["Πόσο κοστίζουν τα μεταφορικά;", "ACS 3,50 € (5,00 € για δυσπρόσιτες περιοχές), BoxNow 2,00 €, Skroutz Last Mile 1,00 €."],
+  ["Πόσο κοστίζουν τα μεταφορικά;", "ACS 3,50 € (5,00 € για δυσπρόσιτες περιοχές), BoxNow 2,00 €."],
   ["Κάνετε προσφορές για εταιρικά δώρα ή μεγάλες ποσότητες;", "Ναι. Στείλε μας αίτημα από τη σελίδα Ζήτα προσφορά με ποσότητα, υλικό και το λογότυπο ή τη φωτογραφία που θες."],
   ["Τι γίνεται αν το προϊόν φτάσει χαλασμένο;", "Στείλε μας φωτογραφίες εντός 3 ημερών από την παραλαβή και το φτιάχνουμε ξανά ή επιστρέφουμε τα χρήματα."],
 ];
 
-export default function FaqPage() {
+export const revalidate = 300;
+
+export default async function FaqPage() {
+  const free = await freeShippingFrom();
+  const list = faq.map(([q, a]): [string, React.ReactNode] =>
+    q === "Πόσο κοστίζουν τα μεταφορικά;" && free ? [q, `${a} Δωρεάν για παραγγελίες από ${euroShort(free)}.`] : [q, a]
+  );
   return (
     <PageShell title="Συχνές ερωτήσεις">
       <div className="flex flex-col divide-y divide-line border-y border-line">
-        {faq.map(([q, a]) => (
+        {list.map(([q, a]) => (
           <details key={q} className="group py-4">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[16px] font-medium">
               {q}
