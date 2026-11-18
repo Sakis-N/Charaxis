@@ -6,6 +6,8 @@ const API = (process.env.BOXNOW_API_URL || "").replace(/\/+$/, "");
 const CLIENT_ID = process.env.BOXNOW_CLIENT_ID;
 const CLIENT_SECRET = process.env.BOXNOW_CLIENT_SECRET;
 const WAREHOUSE = process.env.BOXNOW_WAREHOUSE_ID || "2";
+// Μέγεθος θυρίδας: 1 μικρή, 2 μεσαία, 3 μεγάλη. Τα προϊόντα μας είναι επίπεδα (3 mm), άρα μικρή.
+const SIZE = [1, 2, 3].includes(Number(process.env.BOXNOW_COMPARTMENT_SIZE)) ? Number(process.env.BOXNOW_COMPARTMENT_SIZE) : 1;
 
 export const boxnowConfigured = Boolean(API && CLIENT_ID && CLIENT_SECRET);
 
@@ -64,6 +66,7 @@ export async function createVoucher(orderId: string): Promise<{ parcelId: string
     name: String(it.product_name_snapshot || "Προϊόν").slice(0, 100),
     value: Number(it.line_total || 0).toFixed(2),
     weight: 0,
+    compartmentSize: SIZE,
   }));
   const body = {
     orderNumber: ref,
@@ -83,7 +86,7 @@ export async function createVoucher(orderId: string): Promise<{ parcelId: string
       contactName: o.customer_name,
       locationId: String(lockerId),
     },
-    items: items.length ? items : [{ id: `${ref}-1`, name: "Παραγγελία Charaxis", value: Number(o.total).toFixed(2), weight: 0 }],
+    items: items.length ? items : [{ id: `${ref}-1`, name: "Παραγγελία Charaxis", value: Number(o.total).toFixed(2), weight: 0, compartmentSize: SIZE }],
   };
   const t = await token();
   const r = await fetch(`${API}/api/v1/delivery-requests`, {
