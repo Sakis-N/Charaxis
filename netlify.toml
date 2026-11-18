@@ -3,3 +3,19 @@
 
 # Το Netlify ανιχνεύει αυτόματα το Next.js (App Router) και εγκαθιστά
 # το δικό του Next.js Runtime plugin· δεν χρειάζεται χειροκίνητο publish dir.
+
+# Στατικές φωτογραφίες και γραμματοσειρές: cache στον browser ώστε οι επόμενες επισκέψεις να είναι άμεσες.
+[[headers]]
+  for = "/products/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/brand/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/christmas.js"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"

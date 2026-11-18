@@ -188,7 +188,7 @@ export default function Header() {
               />
               <span className="flex flex-col leading-none">
                 <span className="text-[20px] font-bold tracking-tight md:text-[23px]">Charaxis</span>
-                <span className="mt-1 hidden text-[10px] font-semibold uppercase tracking-[0.26em] text-wood sm:block">
+                <span className="mt-1 hidden whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.26em] text-wood lg:block">
                   Laser Creations
                 </span>
               </span>

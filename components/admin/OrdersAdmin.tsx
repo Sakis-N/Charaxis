@@ -173,6 +173,11 @@ export function OrderCard({ o, reload, defaultOpen = false }: { o: Order; reload
           <span className="text-[12.5px] text-wood">{ago(o.created_at)}</span>
           <span className={`rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold ${payBadge.c}`}>{payBadge.t}</span>
           <span className="rounded-full border border-line px-2.5 py-0.5 text-[11.5px]">{STATUSES[o.status] ?? o.status}</span>
+          {o.shipping_method === "boxnow" && (
+            <span className={`rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold ${o.boxnow_parcel_id ? "bg-[#7CC242] text-white" : "bg-[#F1F9EA] text-[#3F7518] ring-1 ring-[#7CC242]"}`}>
+              BoxNow {o.boxnow_parcel_id ? "✓ voucher" : "· θέλει voucher"}
+            </span>
+          )}
           <span className="w-full truncate text-[12.5px] text-wood md:w-auto">
             {o.order_items.map((i) => `${i.quantity}× ${i.product_name_snapshot}`).join(" · ")}
           </span>
@@ -244,6 +249,46 @@ export function OrderCard({ o, reload, defaultOpen = false }: { o: Order; reload
             </div>
           </div>
 
+          {/* BoxNow: voucher */}
+          {o.shipping_method === "boxnow" && (
+            <div className="flex flex-col gap-3 rounded-xl border border-[#7CC242] bg-[#F1F9EA] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md bg-[#7CC242] px-2 py-1 text-[12px] font-bold tracking-wide text-white">BOX NOW</span>
+                  <b>{o.boxnow_parcel_id ? "Το voucher είναι έτοιμο" : "Voucher αποστολής"}</b>
+                </div>
+                <span className="text-[12.5px] text-wood">
+                  {a.locker_id ? `Θυρίδα ${a.locker_id}` : "Δεν έχει επιλεγεί θυρίδα"}
+                </span>
+              </div>
+              {a.pickup_point && <div className="text-[13.5px] text-wood">📍 {a.pickup_point}</div>}
+              {o.boxnow_parcel_id ? (
+                <div className="flex flex-wrap items-center gap-3">
+                  <button className="rounded-full bg-[#4E8F1F] px-5 py-2.5 text-[14px] font-semibold text-white hover:bg-[#3F7518] disabled:opacity-60" disabled={busy} onClick={() => boxnow("label")}>
+                    🖨 Άνοιγμα / εκτύπωση voucher
+                  </button>
+                  <span className="text-[13px]">Αρ. δέματος: <b>{o.boxnow_parcel_id}</b></span>
+                  <CopyBtn text={o.boxnow_parcel_id} />
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-end gap-3">
+                  <label className="flex flex-col gap-1">
+                    <span className="text-[12px] text-wood">Μέγεθος θυρίδας</span>
+                    <select className={field} value={bnSize} onChange={(e) => setBnSize(Number(e.target.value))} disabled={busy}>
+                      <option value={1}>Μικρή</option>
+                      <option value={2}>Μεσαία</option>
+                      <option value={3}>Μεγάλη</option>
+                    </select>
+                  </label>
+                  <button className="rounded-full bg-[#4E8F1F] px-5 py-2.5 text-[14px] font-semibold text-white hover:bg-[#3F7518] disabled:opacity-60" disabled={busy || !a.locker_id} onClick={() => boxnow("create")}>
+                    {busy ? "Μισό λεπτό…" : "Δημιουργία voucher BoxNow"}
+                  </button>
+                </div>
+              )}
+              {msg && <div className="text-[13px] text-wood">{msg}</div>}
+            </div>
+          )}
+
           {/* Ενέργειες */}
           <div className="flex flex-wrap items-center gap-2 border-t border-line pt-4">
             <NextAction o={o} onDone={(m) => { setMsg(m); reload(); }} />
@@ -270,24 +315,6 @@ export function OrderCard({ o, reload, defaultOpen = false }: { o: Order; reload
                 </label>
               </div>
               <textarea className={field} rows={2} placeholder="Εσωτερικές σημειώσεις (δεν τις βλέπει ο πελάτης)" value={notes} onChange={(e) => setNotes(e.target.value)} />
-              {o.shipping_method === "boxnow" && (
-                <div className="flex flex-wrap items-center gap-2 rounded-md bg-line/30 px-3 py-2 text-[13px]">
-                  <span className="font-medium">BoxNow{a.locker_id ? ` · θυρίδα ${a.locker_id}` : ""}</span>
-                  {o.boxnow_parcel_id ? (
-                    <button className={btn} disabled={busy} onClick={() => boxnow("label")}>Άνοιγμα voucher (PDF)</button>
-                  ) : (
-                    <>
-                      <select className={field} value={bnSize} onChange={(e) => setBnSize(Number(e.target.value))} disabled={busy}>
-                        <option value={1}>Μικρή θυρίδα</option>
-                        <option value={2}>Μεσαία θυρίδα</option>
-                        <option value={3}>Μεγάλη θυρίδα</option>
-                      </select>
-                      <button className={btnDark} disabled={busy || !a.locker_id} onClick={() => boxnow("create")}>Δημιουργία voucher BoxNow</button>
-                    </>
-                  )}
-                  {!a.locker_id && <span className="text-wood">Δεν έχει επιλεγεί θυρίδα από χάρτη</span>}
-                </div>
-              )}
               <div className="flex flex-wrap items-center gap-2">
                 <button className={btnDark} disabled={busy} onClick={() => save({ admin_notes: notes, tracking_number: tracking.trim() || null, production_time: prodTime.trim() || null })}>
                   Αποθήκευση
@@ -296,7 +323,7 @@ export function OrderCard({ o, reload, defaultOpen = false }: { o: Order; reload
               </div>
             </div>
           </details>
-          {msg && <div className="text-[13px] text-wood">{msg}</div>}
+          {msg && o.shipping_method !== "boxnow" && <div className="text-[13px] text-wood">{msg}</div>}
         </div>
       )}
     </div>
