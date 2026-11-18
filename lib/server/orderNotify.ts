@@ -32,7 +32,6 @@ const shortId = (id: string) => id.slice(0, 8).toUpperCase();
 const METHOD: Record<string, string> = {
   acs: "ACS Courier στο σπίτι",
   boxnow: "BoxNow (θυρίδα)",
-  skroutz: "Skroutz Last Mile",
 };
 
 export async function loadOrder(id: string): Promise<Order | null> {

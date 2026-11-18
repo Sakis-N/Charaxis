@@ -35,7 +35,7 @@ export const STATUSES: Record<string, string> = {
   completed: "Ολοκληρώθηκε",
   cancelled: "Ακυρώθηκε",
 };
-export const METHOD: Record<string, string> = { acs: "ACS", boxnow: "BoxNow", skroutz: "Skroutz" };
+export const METHOD: Record<string, string> = { acs: "ACS", boxnow: "BoxNow" };
 export const PAY: Record<string, string> = { stripe: "Κάρτα", bank_transfer: "Κατάθεση", iris: "IRIS" };
 
 export const money = (n: number) => `${Number(n || 0).toFixed(2)} €`;

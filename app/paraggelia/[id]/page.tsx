@@ -32,7 +32,6 @@ const BANK_HOLDER = BANK.holder;
 const COURIER: Record<string, string> = {
   acs: "ACS Courier",
   boxnow: "BoxNow",
-  skroutz: "Skroutz Last Mile",
 };
 
 type Step = { label: string; hint: string; done: boolean; icon: string };

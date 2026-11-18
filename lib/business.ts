@@ -25,7 +25,6 @@ export const DELIVERY_DAYS: [number, number] = [1, 4];
 export const DELIVERY_TIMES: Record<string, string> = {
   acs: "1–3 εργάσιμες ημέρες",
   boxnow: "1–3 εργάσιμες ημέρες",
-  skroutz: "2–4 εργάσιμες ημέρες",
 };
 
 export const IRIS = {
