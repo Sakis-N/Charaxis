@@ -58,6 +58,34 @@ export default function CheckoutPage() {
   const [methodCosts, setMethodCosts] = useState<Record<string, number>>({});
 
   const pickup = method !== "acs";
+  const BN_PARTNER = process.env.NEXT_PUBLIC_BOXNOW_PARTNER_ID;
+  const useMap = pickup && Boolean(BN_PARTNER);
+  const [lockerId, setLockerId] = useState("");
+
+  // Χάρτης θυρίδων BoxNow: φορτώνεται μόνο όταν επιλεγεί BoxNow και υπάρχει partner id.
+  useEffect(() => {
+    if (!useMap) return;
+    const w = window as unknown as Record<string, unknown>;
+    w._bn_map_widget_config = {
+      partnerId: Number(BN_PARTNER),
+      type: "popup",
+      autoclose: true,
+      autoselect: false,
+      buttonSelector: ".boxnow-map-widget-button",
+      afterSelect: (sel: { boxnowLockerId?: string; boxnowLockerAddressLine1?: string; boxnowLockerPostalCode?: string; boxnowLockerName?: string }) => {
+        setLockerId(String(sel.boxnowLockerId ?? ""));
+        setAddress([sel.boxnowLockerName, sel.boxnowLockerAddressLine1].filter(Boolean).join(" — ") || String(sel.boxnowLockerAddressLine1 ?? ""));
+        if (sel.boxnowLockerPostalCode) setPostcode(String(sel.boxnowLockerPostalCode).replace(/\s/g, ""));
+      },
+    };
+    if (!document.getElementById("bn-widget-js")) {
+      const sc = document.createElement("script");
+      sc.id = "bn-widget-js";
+      sc.src = "https://widget-cdn.boxnow.gr/map-widget/client/v5.js";
+      sc.async = true;
+      document.head.appendChild(sc);
+    }
+  }, [useMap, BN_PARTNER]);
 
   // Συμπλήρωση από την προηγούμενη παραγγελία (αν ο πελάτης το επέλεξε τότε).
   useEffect(() => {
@@ -139,6 +167,10 @@ export default function CheckoutPage() {
       setError("Συμπλήρωσε έγκυρο ΤΚ (5 ψηφία).");
       return;
     }
+    if (useMap && !lockerId) {
+      setError("Διάλεξε θυρίδα BoxNow από τον χάρτη.");
+      return;
+    }
     setBusy(true);
     const { data, error: err } = await supabase.rpc("create_order", {
       p_customer: { name: name.trim(), email: email.trim(), phone: phone.trim() },
@@ -153,6 +185,7 @@ export default function CheckoutPage() {
         city: city.trim(),
         postcode: postcode.replace(/\s/g, ""),
         pickup_point: pickup ? address.trim() : null,
+        locker_id: useMap ? lockerId : null,
       },
       p_coupon: couponInfo ? coupon.trim() : "",
       p_payment_provider: payment,
@@ -263,19 +296,30 @@ export default function CheckoutPage() {
 
           <fieldset className="flex flex-col gap-4">
             <legend className="mb-1 font-medium">{pickup ? "Σημείο παραλαβής" : "Διεύθυνση παράδοσης"}</legend>
-            <input
-              required
-              className={input}
-              placeholder={pickup ? "Όνομα / διεύθυνση θυρίδας BoxNow" : "Οδός και αριθμός"}
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              autoComplete={pickup ? "off" : "street-address"}
-            />
+            {useMap && (
+              <div className="flex flex-col gap-3 border border-line p-4">
+                <p className="text-[13px] font-medium">BOX NOW Lockers | Γρήγορη παράδοση, 24/7</p>
+                <button type="button" className="boxnow-map-widget-button self-start rounded-full border border-ink px-5 py-2 text-sm font-medium hover:bg-ink hover:text-white">
+                  {lockerId ? "Αλλαγή θυρίδας" : "Διάλεξε θυρίδα στον χάρτη"}
+                </button>
+                {lockerId && <p className="text-sm">✓ {address}</p>}
+              </div>
+            )}
+            {!useMap && (
+              <input
+                required
+                className={input}
+                placeholder={pickup ? "Όνομα / διεύθυνση θυρίδας BoxNow" : "Οδός και αριθμός"}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                autoComplete={pickup ? "off" : "street-address"}
+              />
+            )}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <input required className={input} placeholder="Πόλη" value={city} onChange={(e) => setCity(e.target.value)} autoComplete="address-level2" />
               <input required inputMode="numeric" maxLength={6} className={input} placeholder="ΤΚ" value={postcode} onChange={(e) => setPostcode(e.target.value)} autoComplete="postal-code" />
             </div>
-            {pickup && (
+            {pickup && !useMap && (
               <p className="font-serif text-[13px] text-wood">
                 Γράψε ακριβώς το σημείο που θέλεις — θα σου στείλουμε email με το tracking μόλις φύγει η παραγγελία.
               </p>

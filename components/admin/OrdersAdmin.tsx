@@ -121,6 +121,32 @@ export function OrderCard({ o, reload, defaultOpen = false }: { o: Order; reload
     reload();
   }
 
+  async function boxnow(action: "create" | "label") {
+    setBusy(true);
+    setMsg(null);
+    const { data: ses } = await supabase.auth.getSession();
+    const h = { Authorization: `Bearer ${ses.session?.access_token ?? ""}` };
+    try {
+      if (action === "create") {
+        const r = await fetch("/api/admin/boxnow", { method: "POST", headers: { ...h, "Content-Type": "application/json" }, body: JSON.stringify({ order_id: o.id }) });
+        const j = await r.json();
+        setMsg(r.ok ? `Voucher BoxNow δημιουργήθηκε (${j.parcelId})` : "Σφάλμα BoxNow: " + (j.error || r.status));
+        if (r.ok) reload();
+      } else {
+        const r = await fetch(`/api/admin/boxnow?order_id=${o.id}`, { headers: h });
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          setMsg("Σφάλμα BoxNow: " + (j.error || r.status));
+        } else {
+          window.open(URL.createObjectURL(await r.blob()), "_blank");
+        }
+      }
+    } catch {
+      setMsg("Σφάλμα σύνδεσης με BoxNow");
+    }
+    setBusy(false);
+  }
+
   async function removeOrder() {
     if (!window.confirm(`Διαγραφή της παραγγελίας #${code(o.id)} του/της ${o.customer_name}; Δεν επαναφέρεται.`)) return;
     setBusy(true);
@@ -243,6 +269,17 @@ export function OrderCard({ o, reload, defaultOpen = false }: { o: Order; reload
                 </label>
               </div>
               <textarea className={field} rows={2} placeholder="Εσωτερικές σημειώσεις (δεν τις βλέπει ο πελάτης)" value={notes} onChange={(e) => setNotes(e.target.value)} />
+              {o.shipping_method === "boxnow" && (
+                <div className="flex flex-wrap items-center gap-2 rounded-md bg-line/30 px-3 py-2 text-[13px]">
+                  <span className="font-medium">BoxNow{a.locker_id ? ` · θυρίδα ${a.locker_id}` : ""}</span>
+                  {o.boxnow_parcel_id ? (
+                    <button className={btn} disabled={busy} onClick={() => boxnow("label")}>Άνοιγμα voucher (PDF)</button>
+                  ) : (
+                    <button className={btnDark} disabled={busy || !a.locker_id} onClick={() => boxnow("create")}>Δημιουργία voucher BoxNow</button>
+                  )}
+                  {!a.locker_id && <span className="text-wood">Δεν έχει επιλεγεί θυρίδα από χάρτη</span>}
+                </div>
+              )}
               <div className="flex flex-wrap items-center gap-2">
                 <button className={btnDark} disabled={busy} onClick={() => save({ admin_notes: notes, tracking_number: tracking.trim() || null, production_time: prodTime.trim() || null })}>
                   Αποθήκευση

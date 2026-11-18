@@ -11,7 +11,7 @@ export type Order = {
   customer_name: string;
   customer_email: string;
   customer_phone: string | null;
-  shipping_address: { address?: string; city?: string; postcode?: string; pickup_point?: string | null };
+  shipping_address: { address?: string; city?: string; postcode?: string; pickup_point?: string | null; locker_id?: string | null };
   shipping_method: string;
   shipping_cost: number;
   discount_amount: number;
@@ -24,6 +24,7 @@ export type Order = {
   tracking_number: string | null;
   admin_notes: string | null;
   production_time?: string | null;
+  boxnow_parcel_id?: string | null;
   order_items: OrderItem[];
 };
 
