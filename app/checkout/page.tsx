@@ -68,6 +68,7 @@ export default function CheckoutPage() {
     const w = window as unknown as Record<string, unknown>;
     w._bn_map_widget_config = {
       partnerId: Number(BN_PARTNER),
+      parentElement: "#boxnowmap",
       type: "popup",
       autoclose: true,
       autoselect: false,
@@ -303,6 +304,7 @@ export default function CheckoutPage() {
                   {lockerId ? "Αλλαγή θυρίδας" : "Διάλεξε θυρίδα στον χάρτη"}
                 </button>
                 {lockerId && <p className="text-sm">✓ {address}</p>}
+                <div id="boxnowmap" />
               </div>
             )}
             {!useMap && (
