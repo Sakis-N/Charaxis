@@ -15,6 +15,7 @@ export default function ContactPage() {
         <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>
         {BUSINESS.phone && <a href={`tel:${BUSINESS.phone.replace(/\s/g, "")}`}>{BUSINESS.phone}</a>}
         {BUSINESS.instagram && <a href={BUSINESS.instagram} target="_blank" rel="noreferrer">Instagram</a>}
+        {BUSINESS.tiktok && <a href={BUSINESS.tiktok} target="_blank" rel="noreferrer">TikTok</a>}
         {BUSINESS.facebook && <a href={BUSINESS.facebook} target="_blank" rel="noreferrer">Facebook</a>}
       </div>
       <ContactForm />
