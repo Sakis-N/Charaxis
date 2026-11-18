@@ -79,6 +79,13 @@ export default function CheckoutPage() {
         if (sel.boxnowLockerPostalCode) setPostcode(String(sel.boxnowLockerPostalCode).replace(/\s/g, ""));
       },
     };
+    // Το iframe του BoxNow έρχεται με z-index:auto και το σκεπάζουν η περίληψη, το χιόνι και τα λαμπάκια.
+    if (!document.getElementById("bn-widget-css")) {
+      const st = document.createElement("style");
+      st.id = "bn-widget-css";
+      st.textContent = 'iframe[id^="boxnow_map_widget"]{z-index:2147483000!important}';
+      document.head.appendChild(st);
+    }
     if (!document.getElementById("bn-widget-js")) {
       const sc = document.createElement("script");
       sc.id = "bn-widget-js";
