@@ -54,7 +54,7 @@ export default function ProductGallery({ images, productName }: Props) {
           alt={`${productName} — φωτογραφία ${active + 1}`}
           fill
           sizes="(min-width: 768px) 50vw, 100vw"
-          className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+          className="object-contain transition-transform duration-300 ease-out group-hover:scale-[1.02]"
           priority
         />
         <span className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-ink/70 px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -79,7 +79,7 @@ export default function ProductGallery({ images, productName }: Props) {
               }`}
               aria-label={`Φωτογραφία ${i + 1}`}
             >
-              <Image src={src} alt="" fill sizes="64px" className="object-cover" />
+              <Image src={src} alt="" fill sizes="64px" className="object-contain bg-line/40" />
             </button>
           ))}
         </div>
