@@ -56,6 +56,12 @@ export default function RootLayout({
         </CartProvider>
         {/* Χριστουγεννιάτικο εφέ. Μετά τις γιορτές: σβήσε αυτή τη γραμμή. */}
         <Script src="/christmas.js" strategy="afterInteractive" />
+        {/* Cloudflare Web Analytics — στατιστικά επισκεπτών χωρίς cookies */}
+        <Script
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          strategy="afterInteractive"
+          data-cf-beacon='{"token": "34c31446cb9c4cb587f356e1c11d4412"}'
+        />
       </body>
     </html>
   );
