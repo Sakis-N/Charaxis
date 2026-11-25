@@ -2,6 +2,11 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { tierPrice, type Tiers } from "@/lib/pricing";
+import { salePrice } from "@/lib/sale";
+
+// Τιμή ανά τεμάχιο που πληρώνει ο πελάτης τώρα (με την τρέχουσα προσφορά, αν υπάρχει).
+// Το `price` στο καλάθι μένει η κανονική τιμή, ώστε μετά το τέλος της προσφοράς να επιστρέφει.
+export const unitPrice = (i: { price: number }) => salePrice(i.price);
 
 export type CartItem = {
   key: string;
@@ -9,7 +14,7 @@ export type CartItem = {
   slug: string;
   name: string;
   image: string | null;
-  price: number; // ενδεικτική τιμή· η τελική υπολογίζεται στον server
+  price: number; // κανονική τιμή ανά τεμάχιο (χωρίς προσφορά)· ενδεικτική, η τελική υπολογίζεται στον server
   quantity: number;
   // Κλιμάκια τιμής ανά ποσότητα (μόνο για προϊόντα με κλιμακωτή τιμολόγηση).
   tiers?: Tiers | null;
@@ -72,7 +77,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       items,
       ready,
       count: items.reduce((n, i) => n + i.quantity, 0),
-      subtotal: items.reduce((n, i) => n + i.price * i.quantity, 0),
+      subtotal: Math.round(items.reduce((n, i) => n + unitPrice(i) * i.quantity, 0) * 100) / 100,
       add,
       setQty,
       remove,

@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cart";
 import { getActiveCategories, type NavCategory } from "@/lib/categories";
 import { BUSINESS, PRODUCTION_TIME } from "@/lib/business";
 import { getFreeShippingFrom } from "@/components/FreeShippingBar";
+import { SALE, saleActive } from "@/lib/sale";
 
 // Σύντομα, ώστε να χωράνε σε μία γραμμή και στο κινητό.
 const BASE_MESSAGES = [
@@ -16,15 +17,17 @@ const BASE_MESSAGES = [
 ];
 // Εποχικό μήνυμα μόνο Νοέμβριο–Δεκέμβριο.
 const XMAS = "🎄 Δώρα Χριστουγέννων: παράγγειλε νωρίς";
+const SALE_MESSAGE = `🖤 ${SALE.name.toUpperCase()}: -${SALE.percent}% σε όλο το site · ${SALE.datesLabel}`;
 
 function AnnouncementBar() {
   const [i, setI] = useState(0);
-  const [messages, setMessages] = useState(BASE_MESSAGES);
+  const [messages, setMessages] = useState(() => (saleActive() ? [SALE_MESSAGE, ...BASE_MESSAGES] : BASE_MESSAGES));
   useEffect(() => {
     const m = new Date().getMonth();
     getFreeShippingFrom().then((from) => {
       const free = from ? [`🚚 Δωρεάν μεταφορικά για αγορές από ${from % 1 ? from.toFixed(2).replace(".", ",") : from} €`] : [];
-      setMessages([...free, ...(m === 10 || m === 11 ? [XMAS] : []), ...BASE_MESSAGES]);
+      const sale = saleActive() ? [SALE_MESSAGE] : [];
+      setMessages([...sale, ...free, ...(m === 10 || m === 11 ? [XMAS] : []), ...BASE_MESSAGES]);
     });
   }, []);
   const MESSAGES = messages;
@@ -43,7 +46,7 @@ function AnnouncementBar() {
             idx === i ? "translate-y-0 opacity-100" : idx < i ? "-translate-y-full opacity-0" : "translate-y-full opacity-0"
           }`}
         >
-          {m}
+          {m === SALE_MESSAGE ? <b className="font-semibold text-[#F7C95B]">{m}</b> : m}
         </p>
       ))}
     </div>

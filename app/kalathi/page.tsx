@@ -4,11 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useCart } from "@/lib/cart";
+import { unitPrice, useCart } from "@/lib/cart";
+import { SALE, salePercent } from "@/lib/sale";
 import FreeShippingBar from "@/components/FreeShippingBar";
 
 export default function CartPage() {
   const { items, ready, subtotal, setQty, remove } = useCart();
+  const saved = Math.round(items.reduce((n, i) => n + (i.price - unitPrice(i)) * i.quantity, 0) * 100) / 100;
 
   return (
     <main className="flex flex-col overflow-x-hidden">
@@ -50,7 +52,7 @@ export default function CartPage() {
                       </div>
                     )}
                     {it.tiers && (
-                      <div className="text-[13px] text-wood">{it.price.toFixed(2)} € ανά τεμάχιο</div>
+                      <div className="text-[13px] text-wood">{unitPrice(it).toFixed(2)} € ανά τεμάχιο</div>
                     )}
                     <div className="mt-auto flex items-center gap-4 pt-2 text-sm">
                       <div className="flex items-center border border-line">
@@ -72,7 +74,10 @@ export default function CartPage() {
                       </button>
                     </div>
                   </div>
-                  <div className="shrink-0 font-medium">{(it.price * it.quantity).toFixed(2)} €</div>
+                  <div className="shrink-0 text-right font-medium">
+                    {(unitPrice(it) * it.quantity).toFixed(2)} €
+                    {unitPrice(it) < it.price && <s className="block text-[12.5px] font-normal text-faint">{(it.price * it.quantity).toFixed(2)} €</s>}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -83,6 +88,12 @@ export default function CartPage() {
                 <span className="text-wood">Υποσύνολο</span>
                 <span className="font-medium">{subtotal.toFixed(2)} €</span>
               </div>
+              {saved > 0 && (
+                <div className="flex justify-between text-[13px] font-medium text-ember">
+                  <span>🖤 {SALE.name} -{salePercent()}%</span>
+                  <span className="whitespace-nowrap">κερδίζεις {saved.toFixed(2)} €</span>
+                </div>
+              )}
               <p className="font-serif text-[13px] text-wood">Τα μεταφορικά υπολογίζονται στο επόμενο βήμα.</p>
               <Link href="/checkout" className="bg-ink px-7 py-3 text-center text-sm font-medium text-paper transition-colors duration-200 hover:bg-ember">
                 Συνέχεια στην παραγγελία

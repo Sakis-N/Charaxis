@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCart } from "@/lib/cart";
+import { unitPrice, useCart } from "@/lib/cart";
 import { PRODUCTION_TIME } from "@/lib/business";
 import FreeShippingBar from "@/components/FreeShippingBar";
 
@@ -108,7 +108,10 @@ export default function CartDrawer() {
                       <Link href={`/proionta/${it.slug}`} className="text-[14.5px] font-medium leading-snug hover:text-ember">
                         {it.name}
                       </Link>
-                      <span className="shrink-0 text-[14.5px] font-medium">{(it.price * it.quantity).toFixed(2)} €</span>
+                      <span className="shrink-0 text-right text-[14.5px] font-medium">
+                        {(unitPrice(it) * it.quantity).toFixed(2)} €
+                        {unitPrice(it) < it.price && <s className="block text-[12px] font-normal text-faint">{(it.price * it.quantity).toFixed(2)} €</s>}
+                      </span>
                     </div>
                     {it.custom_design?.fields.slice(0, 3).map((f) => (
                       <div key={f.id} className="truncate text-[12.5px] text-wood">

@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cart";
 import { flyToCart } from "@/components/flyToCart";
 import EngravePreview from "@/components/EngravePreview";
 import { SIDE_CHOICES, rangeLabel, tierPrice, tiersFor, variantKey, type Pricing } from "@/lib/pricing";
+import { salePrice } from "@/lib/sale";
 
 export type CustomField = {
   id: string;
@@ -136,6 +137,9 @@ export default function ProductCustomizer({ productId, slug, image, productName,
   const tiers = pricing && variant ? tiersFor(pricing, variant) : null;
   const qtyNum = Math.min(5000, Math.max(1, parseInt(qtyText, 10) || 1));
   const unit = tiers ? tierPrice(tiers, qtyNum) : pricing ? null : basePrice;
+  // Τιμή που φαίνεται (με την τρέχουσα προσφορά)· στο καλάθι μπαίνει η κανονική `unit`.
+  const shown = unit != null ? salePrice(unit) : null;
+  const onSale = unit != null && shown != null && shown < unit;
 
   let sideProblem: string | null = null;
   if (sides.length) {
@@ -159,7 +163,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
     const base = addon?.choices?.[0]?.key;
     const a = pricing && base ? tiersFor(pricing, key) : null;
     const b = pricing && base ? tiersFor(pricing, base) : null;
-    return a && b ? tierPrice(a, qtyNum) - tierPrice(b, qtyNum) : 0;
+    return a && b ? salePrice(tierPrice(a, qtyNum)) - salePrice(tierPrice(b, qtyNum)) : 0;
   }
 
   function addToCart(btn: HTMLElement) {
@@ -532,7 +536,7 @@ export default function ProductCustomizer({ productId, slug, image, productName,
                   const active = qtyNum >= min && (next === undefined || qtyNum < next);
                   return (
                     <li key={min} className={active ? "font-medium text-ember" : "text-wood"}>
-                      {rangeLabel(tiers, i)}: {pr.toFixed(2)} €
+                      {rangeLabel(tiers, i)}: {salePrice(pr).toFixed(2)} €
                     </li>
                   );
                 })}
@@ -546,16 +550,22 @@ export default function ProductCustomizer({ productId, slug, image, productName,
 
       <div ref={actionRef} className="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
         <div className="flex flex-col text-lg font-medium text-ember">
-          {unit ? (
+          {unit && shown ? (
             pricing ? (
               <>
-                <span>{(unit * qtyNum).toFixed(2)} €</span>
+                <span>
+                  {(shown * qtyNum).toFixed(2)} €
+                  {onSale && <s className="ml-2 text-sm font-normal text-faint">{(unit * qtyNum).toFixed(2)} €</s>}
+                </span>
                 <span className="text-xs font-normal text-wood">
-                  {qtyNum} × {unit.toFixed(2)} € ανά τεμάχιο
+                  {qtyNum} × {shown.toFixed(2)} € ανά τεμάχιο
                 </span>
               </>
             ) : (
-              `${unit.toFixed(2)} €`
+              <span>
+                {shown.toFixed(2)} €
+                {onSale && <s className="ml-2 text-sm font-normal text-faint">{unit.toFixed(2)} €</s>}
+              </span>
             )
           ) : (
             ""
@@ -600,10 +610,10 @@ export default function ProductCustomizer({ productId, slug, image, productName,
         <div className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 flex-col">
             <span className="text-lg font-semibold text-ember">
-              {unit ? `${(unit * (pricing ? qtyNum : 1)).toFixed(2)} €` : ""}
+              {shown ? `${(shown * (pricing ? qtyNum : 1)).toFixed(2)} €` : ""}
             </span>
             <span className="truncate text-[11.5px] text-wood">
-              {!canAdd && firstProblem ? firstProblem : pricing && unit ? `${qtyNum} × ${unit.toFixed(2)} €` : "Φτιάχνεται ειδικά για σένα"}
+              {!canAdd && firstProblem ? firstProblem : pricing && shown ? `${qtyNum} × ${shown.toFixed(2)} €` : "Φτιάχνεται ειδικά για σένα"}
             </span>
           </div>
           <button

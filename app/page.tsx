@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import SaleBanner from "@/components/SaleBanner";
 import Marquee from "@/components/Marquee";
 import Categories from "@/components/Categories";
 import GiftIdeas from "@/components/GiftIdeas";
@@ -15,6 +16,7 @@ export default function HomePage() {
   return (
     <main className="flex flex-col overflow-x-hidden">
       <Header />
+      <SaleBanner />
       <Hero />
       <Marquee />
       <Categories />

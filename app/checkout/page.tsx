@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase/client";
-import { useCart } from "@/lib/cart";
+import { unitPrice, useCart } from "@/lib/cart";
+import { SALE, salePercent } from "@/lib/sale";
 import { saveOrder } from "@/lib/myOrders";
 import FreeShippingBar, { useFreeShippingFrom } from "@/components/FreeShippingBar";
 
@@ -143,6 +144,10 @@ export default function CheckoutPage() {
     };
   }, [method, postcode]);
 
+  const saved = useMemo(
+    () => Math.round(items.reduce((n, i) => n + (i.price - unitPrice(i)) * i.quantity, 0) * 100) / 100,
+    [items]
+  );
   const discount = useMemo(() => {
     if (!couponInfo) return 0;
     const d = couponInfo.type === "percentage" ? (subtotal * couponInfo.value) / 100 : couponInfo.value;
@@ -387,7 +392,7 @@ export default function CheckoutPage() {
                   </span>
                 </span>
                 <span className="min-w-0 flex-1 break-words leading-snug">{i.name}</span>
-                <span className="shrink-0">{(i.price * i.quantity).toFixed(2)} €</span>
+                <span className="shrink-0">{(unitPrice(i) * i.quantity).toFixed(2)} €</span>
               </li>
             ))}
           </ul>
@@ -404,6 +409,12 @@ export default function CheckoutPage() {
 
           <div className="flex flex-col gap-2 border-t border-line pt-4 text-sm">
             <div className="flex justify-between"><span className="text-wood">Υποσύνολο</span><span>{subtotal.toFixed(2)} €</span></div>
+            {saved > 0 && (
+              <div className="flex justify-between text-[13px] font-medium text-ember">
+                <span>🖤 {SALE.name} -{salePercent()}%</span>
+                <span className="whitespace-nowrap">κερδίζεις {saved.toFixed(2)} €</span>
+              </div>
+            )}
             {discount > 0 && <div className="flex justify-between"><span className="text-wood">Έκπτωση</span><span>−{discount.toFixed(2)} €</span></div>}
             <div className="flex justify-between">
               <span className="text-wood">Μεταφορικά</span>

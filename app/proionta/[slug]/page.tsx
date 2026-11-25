@@ -13,6 +13,7 @@ import ShareButton from "@/components/ShareButton";
 import DeliveryEstimate from "@/components/DeliveryEstimate";
 import RecentlyViewed from "@/components/RecentlyViewed";
 import { minPrice, type Pricing } from "@/lib/pricing";
+import { SALE, salePercent, salePrice } from "@/lib/sale";
 import { SITE_URL } from "@/lib/site";
 
 // Οι αλλαγές από το admin εμφανίζονται στο site μέσα σε ~1 λεπτό, χωρίς νέο deploy.
@@ -111,6 +112,8 @@ export default async function ProductPage({
   const pricing = product.pricing;
   const price = pricing ? minPrice(pricing) : product.base_price ? Number(product.base_price) : null;
   const url = `${SITE_URL}/proionta/${product.slug}`;
+  const pct = salePercent();
+  const shownPrice = price != null ? salePrice(price, pct) : null;
 
   const crumbs = [
     { name: "Αρχική", url: `${SITE_URL}/` },
@@ -139,7 +142,8 @@ export default async function ProductPage({
                     "@type": "Offer",
                     url,
                     priceCurrency: "EUR",
-                    price: price.toFixed(2),
+                    price: (shownPrice ?? price).toFixed(2),
+                    ...(pct > 0 ? { priceValidUntil: SALE.endsAt.slice(0, 10) } : {}),
                     availability: "https://schema.org/MadeToOrder",
                     itemCondition: "https://schema.org/NewCondition",
                     seller: { "@type": "Organization", name: "Charaxis" },
@@ -187,8 +191,18 @@ export default async function ProductPage({
             {product.name}
           </h1>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="text-2xl font-medium text-ember">
-              {price ? `${pricing ? "από " : ""}${price.toFixed(2)} €${pricing ? " / τεμ." : ""}` : ""}
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="text-2xl font-medium text-ember">
+                {price && shownPrice ? `${pricing ? "από " : ""}${shownPrice.toFixed(2)} €${pricing ? " / τεμ." : ""}` : ""}
+              </span>
+              {price && pct > 0 ? (
+                <>
+                  <s className="text-base text-faint">{price.toFixed(2)} €</s>
+                  <span className="rounded-full bg-ink px-2.5 py-1 text-[12px] font-bold tracking-wide text-[#F7C95B]">
+                    {SALE.name} -{pct}%
+                  </span>
+                </>
+              ) : null}
             </div>
             <ShareButton title={product.name} />
           </div>
@@ -255,7 +269,7 @@ export default async function ProductPage({
           slug: product.slug,
           name: product.name,
           image: images[0] ?? null,
-          price: price ? `${pricing ? "από " : ""}${price.toFixed(2)} €` : "",
+          price: price && shownPrice ? `${pricing ? "από " : ""}${shownPrice.toFixed(2)} €` : "",
         }}
       />
 

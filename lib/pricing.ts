@@ -1,3 +1,5 @@
+import { salePercent, salePrice } from "@/lib/sale";
+
 // Κλιμακωτή τιμολόγηση ανά ποσότητα (π.χ. μπρελόκ για καταστήματα).
 // Η τελική τιμή υπολογίζεται ΠΑΝΤΑ στη βάση (συνάρτηση product_unit_price)·
 // ό,τι δείχνει ο browser είναι ενδεικτικό και ακολουθεί τον ίδιο κανόνα.
@@ -54,7 +56,13 @@ export function rangeLabel(tiers: Tiers, i: number): string {
 }
 
 // Κείμενο τιμής για κάρτες/λίστες: "από 0.55 € / τεμ." για κλιμακωτά, αλλιώς η σταθερή τιμή.
-export function listPrice(basePrice: string | number | null | undefined, pricing?: Pricing | null): string {
-  if (pricing) return `από ${minPrice(pricing).toFixed(2)} € / τεμ.`;
-  return basePrice ? `${Number(basePrice).toFixed(2)} €` : "";
+// Αν τρέχει προσφορά (lib/sale.ts), δείχνει την τιμή μετά την έκπτωση· με `original` την αρχική.
+export function listPrice(
+  basePrice: string | number | null | undefined,
+  pricing?: Pricing | null,
+  { original = false }: { original?: boolean } = {}
+): string {
+  const pct = original ? 0 : salePercent();
+  if (pricing) return `από ${salePrice(minPrice(pricing), pct).toFixed(2)} € / τεμ.`;
+  return basePrice ? `${salePrice(Number(basePrice), pct).toFixed(2)} €` : "";
 }

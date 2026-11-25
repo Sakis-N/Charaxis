@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { listPrice, type Pricing } from "@/lib/pricing";
+import { salePercent } from "@/lib/sale";
 
 type Item = {
   id: string;
@@ -242,7 +243,12 @@ export default function SearchOverlay() {
                       <span className="truncate text-[15px] font-medium">{it.name}</span>
                       <span className="text-[12.5px] text-wood">{it.category}</span>
                     </span>
-                    <span className="shrink-0 text-[14px] font-semibold text-ember">{listPrice(it.base_price, it.pricing)}</span>
+                    <span className="shrink-0 text-right text-[14px] font-semibold text-ember">
+                      {listPrice(it.base_price, it.pricing)}
+                      {salePercent() > 0 && (it.base_price || it.pricing) && (
+                        <s className="block text-[11.5px] font-normal text-faint">{listPrice(it.base_price, it.pricing, { original: true }).replace(/^από /, "")}</s>
+                      )}
+                    </span>
                   </Link>
                 </li>
               ))}
