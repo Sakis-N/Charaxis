@@ -149,7 +149,7 @@ export default function CheckoutPage() {
     [items]
   );
   const discount = useMemo(() => {
-    if (!couponInfo) return 0;
+    if (!couponInfo || salePercent() > 0) return 0;
     const d = couponInfo.type === "percentage" ? (subtotal * couponInfo.value) / 100 : couponInfo.value;
     return Math.min(Math.round(d * 100) / 100, subtotal);
   }, [couponInfo, subtotal]);
@@ -200,7 +200,7 @@ export default function CheckoutPage() {
         pickup_point: pickup ? address.trim() : null,
         locker_id: useMap ? lockerId : null,
       },
-      p_coupon: couponInfo ? coupon.trim() : "",
+      p_coupon: couponInfo && !salePercent() ? coupon.trim() : "",
       p_payment_provider: payment,
       p_notes: notes.trim() || null,
     });
@@ -397,13 +397,21 @@ export default function CheckoutPage() {
             ))}
           </ul>
 
-          <div className="flex gap-2">
-            <input className={input} placeholder="Κουπόνι" value={coupon} onChange={(e) => setCoupon(e.target.value)} />
-            <button type="button" onClick={applyCoupon} className="border border-ink px-4 text-sm transition-colors hover:border-ember hover:text-ember">
-              Εφαρμογή
-            </button>
-          </div>
-          {couponMsg && <p className="-mt-3 text-xs text-wood">{couponMsg}</p>}
+          {salePercent() > 0 ? (
+            <p className="rounded-sm bg-ink px-4 py-3 text-[12.5px] leading-snug text-paper/90">
+              <b className="text-[#F7C95B]">🖤 {SALE.name} -{salePercent()}%</b> · η έκπτωση είναι ήδη στις τιμές. Όσο τρέχει η προσφορά τα κουπόνια δεν συνδυάζονται.
+            </p>
+          ) : (
+            <>
+            <div className="flex gap-2">
+              <input className={input} placeholder="Κουπόνι" value={coupon} onChange={(e) => setCoupon(e.target.value)} />
+              <button type="button" onClick={applyCoupon} className="border border-ink px-4 text-sm transition-colors hover:border-ember hover:text-ember">
+                Εφαρμογή
+              </button>
+            </div>
+            {couponMsg && <p className="-mt-3 text-xs text-wood">{couponMsg}</p>}
+            </>
+          )}
 
           <FreeShippingBar amount={subtotal - discount} compact />
 

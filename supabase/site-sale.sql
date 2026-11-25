@@ -1,8 +1,8 @@
 -- Έκπτωση σε όλο το site για συγκεκριμένο διάστημα (Black Friday 2026: -40%, 25–30/11).
 -- Η ρύθμιση ζει στο shop_settings.key = 'sale' και πρέπει να συμφωνεί με το lib/sale.ts
 -- (το site τη χρησιμοποιεί μόνο για να δείχνει τις τιμές· εδώ γίνεται η πραγματική χρέωση).
--- Η έκπτωση εφαρμόζεται στην τιμή ανά τεμάχιο (στρογγυλεμένη στο λεπτό), πριν από κουπόνια
--- και πριν από τον έλεγχο για δωρεάν μεταφορικά. Εκτός διαστήματος δεν αλλάζει τίποτα.
+-- Η έκπτωση εφαρμόζεται στην τιμή ανά τεμάχιο (στρογγυλεμένη στο λεπτό), πριν από τον έλεγχο
+-- για δωρεάν μεταφορικά. Όσο τρέχει η προσφορά, τα κουπόνια ΔΕΝ ισχύουν (δεν συνδυάζονται). Εκτός διαστήματος δεν αλλάζει τίποτα.
 -- Για να σταματήσει νωρίτερα: update shop_settings set value = jsonb_set(value,'{percent}','0') where key='sale';
 
 insert into public.shop_settings (key, value) values (
@@ -87,6 +87,10 @@ begin
     end if;
   end if;
 
+  if coalesce(p_coupon,'') <> '' and sale_pct > 0 then
+    raise exception 'Τα κουπόνια δεν ισχύουν όσο τρέχει η προσφορά (η έκπτωση είναι ήδη στις τιμές)';
+  end if;
+
   if coalesce(p_coupon,'') <> '' then
     select * into cp from coupons where lower(code) = lower(p_coupon)
       and active and (expires_at is null or expires_at > now())
@@ -130,5 +134,46 @@ begin
 
   return jsonb_build_object('order_id', oid, 'subtotal', subtotal, 'discount', discount,
     'shipping', ship, 'total', subtotal - discount + ship);
+end;
+$function$;
+
+-- Κουπόνια: όσο τρέχει η προσφορά απαντά «μη έγκυρο» με σαφές μήνυμα.
+create or replace function public.validate_coupon(coupon_code text)
+ returns table(valid boolean, discount_type text, discount_value numeric, message text)
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+declare
+  c record;
+begin
+  if sale_percent() > 0 then
+    return query select false, null::text, null::numeric, 'Τα κουπόνια δεν ισχύουν όσο τρέχει η προσφορά. Η έκπτωση είναι ήδη στις τιμές.';
+    return;
+  end if;
+
+  select * into c from public.coupons where lower(code) = lower(coupon_code);
+
+  if not found then
+    return query select false, null::text, null::numeric, 'Ο κωδικός δεν βρέθηκε';
+    return;
+  end if;
+
+  if not c.active then
+    return query select false, null::text, null::numeric, 'Ο κωδικός δεν είναι ενεργός';
+    return;
+  end if;
+
+  if c.expires_at is not null and c.expires_at < now() then
+    return query select false, null::text, null::numeric, 'Ο κωδικός έχει λήξει';
+    return;
+  end if;
+
+  if c.max_uses is not null and c.times_used >= c.max_uses then
+    return query select false, null::text, null::numeric, 'Ο κωδικός έχει εξαντληθεί';
+    return;
+  end if;
+
+  return query select true, c.discount_type, c.discount_value, 'OK';
 end;
 $function$;
