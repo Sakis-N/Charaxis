@@ -253,7 +253,7 @@ export default function AdminApp() {
     setState("out");
   }
 
-  function goto(t: "orders" | "quotes" | "messages" | "products", filter?: string) {
+  function goto(t: "orders" | "quotes" | "messages" | "products" | "costing", filter?: string) {
     if (t === "orders") setOrderFilter(filter ?? "active");
     if (t === "products") setNewProduct((n) => n + 1);
     setTab(t);
@@ -290,10 +290,10 @@ export default function AdminApp() {
     { k: "quotes", l: "Προσφορές", n: newQuotes },
     { k: "messages", l: "Μηνύματα", n: newMessages },
     { k: "coupons", l: "Κουπόνια" },
-    { k: "costing", l: "Κοστολόγηση" },
+    { k: "costing", l: "Κόστος" },
     { k: "settings", l: "Μεταφορικά" },
   ];
-  const mobileTabs = tabs.filter((t) => ["today", "orders", "products", "quotes", "messages"].includes(t.k));
+  const mobileTabs = tabs.filter((t) => ["today", "orders", "products", "quotes", "messages", "costing"].includes(t.k));
 
   const Icon = ({ t }: { t: Tab }) => (
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -370,7 +370,7 @@ export default function AdminApp() {
 
       {/* Κάτω μπάρα (κινητό) */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-paper/95 backdrop-blur md:hidden print:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-line bg-paper/95 backdrop-blur md:hidden print:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         {mobileTabs.map((t) => (

@@ -9,7 +9,7 @@ type Props = {
   reload: () => void;
   newQuotes: number;
   newMessages: number;
-  goto: (tab: "orders" | "quotes" | "messages" | "products", filter?: string) => void;
+  goto: (tab: "orders" | "quotes" | "messages" | "products" | "costing", filter?: string) => void;
 };
 
 const startOfDay = (d = new Date()) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -61,6 +61,13 @@ export default function Today({ orders, reload, newQuotes, newMessages, goto }: 
             {todo === 0 ? "Όλα είναι εντάξει. Καμία εκκρεμότητα." : `Έχεις ${todo} ${todo === 1 ? "παραγγελία" : "παραγγελίες"} σε εξέλιξη.`}
           </p>
         </div>
+        <div className="flex flex-wrap gap-2">
+        <button
+          className="rounded-full border-2 border-ink bg-paper px-5 py-2.5 text-[14px] font-semibold hover:border-ember hover:text-ember"
+          onClick={() => goto("costing")}
+        >
+          🧮 Υπολογισμός κόστους
+        </button>
         {byStage.to_start.length + byStage.engraving.length > 0 && (
           <a
             className="rounded-full bg-ember px-5 py-2.5 text-[14px] font-semibold text-paper hover:bg-ember-dark"
@@ -71,6 +78,7 @@ export default function Today({ orders, reload, newQuotes, newMessages, goto }: 
             🖨 Φύλλο ημέρας ({byStage.to_start.length + byStage.engraving.length})
           </a>
         )}
+        </div>
       </div>
 
       {/* Ειδοποιήσεις */}
