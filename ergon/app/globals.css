@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { -webkit-tap-highlight-color: transparent; }
+body { @apply bg-gray-50 text-gray-900 antialiased; }
+a { -webkit-touch-callout: none; }
+
+@media print {
+  body { background: #fff !important; }
+  .no-print, nav, header, aside { display: none !important; }
+  main { padding: 0 !important; margin: 0 !important; max-width: none !important; }
+  @page { margin: 14mm; }
+}
+
+/* grid/flex παιδιά να μπορούν να στενέψουν (κινητό) */
+.grid > * { min-width: 0; }

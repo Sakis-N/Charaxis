@@ -1,0 +1,13 @@
+services:
+  ergon:
+    build: .
+    container_name: ergon
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+      TZ: Europe/Athens
+    volumes:
+      - ./data:/data
