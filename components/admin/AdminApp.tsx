@@ -7,6 +7,7 @@ import ProductsAdmin from "@/components/admin/ProductsAdmin";
 import SettingsAdmin from "@/components/admin/SettingsAdmin";
 import OrdersAdmin, { Photo } from "@/components/admin/OrdersAdmin";
 import Today from "@/components/admin/Today";
+import CostingAdmin from "@/components/admin/CostingAdmin";
 import { btn, btnDark, code, field, fmt, stageOf, type Order } from "@/components/admin/shared";
 
 type Quote = {
@@ -156,7 +157,7 @@ function ding() {
   } catch {}
 }
 
-type Tab = "today" | "orders" | "products" | "quotes" | "messages" | "coupons" | "settings";
+type Tab = "today" | "orders" | "products" | "quotes" | "messages" | "coupons" | "costing" | "settings";
 
 const ICONS: Record<Tab, string> = {
   today: "M3 12l9-8 9 8M5 10v10h14V10",
@@ -165,6 +166,7 @@ const ICONS: Record<Tab, string> = {
   quotes: "M4 5h16v11H8l-4 4z",
   messages: "M3 6h18v12H3zM3 7l9 6 9-6",
   coupons: "M4 8a2 2 0 002-2h12a2 2 0 002 2v2a2 2 0 000 4v2a2 2 0 00-2 2H6a2 2 0 00-2-2v-2a2 2 0 000-4zM10 9l4 6",
+  costing: "M6 3h12v18H6zM9 7h6M9 11h1M12 11h1M15 11h0M9 14h1M12 14h1M9 17h1M12 17h1M15 14v3",
   settings: "M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM17 19a1.5 1.5 0 100-3 1.5 1.5 0 000 3z",
 };
 
@@ -288,6 +290,7 @@ export default function AdminApp() {
     { k: "quotes", l: "Προσφορές", n: newQuotes },
     { k: "messages", l: "Μηνύματα", n: newMessages },
     { k: "coupons", l: "Κουπόνια" },
+    { k: "costing", l: "Κοστολόγηση" },
     { k: "settings", l: "Μεταφορικά" },
   ];
   const mobileTabs = tabs.filter((t) => ["today", "orders", "products", "quotes", "messages"].includes(t.k));
@@ -359,6 +362,7 @@ export default function AdminApp() {
             {tab === "quotes" && <Quotes rows={quotes} reload={loadAll} />}
             {tab === "messages" && <Messages rows={messages} reload={loadAll} />}
             {tab === "coupons" && <Coupons />}
+            {tab === "costing" && <CostingAdmin />}
             {tab === "settings" && <SettingsAdmin />}
           </>
         )}
